@@ -33,15 +33,12 @@ public class CustomerService {
     }
 
     public Customer getById(Long id) {
-        Customer c = customerRepository.findOne(id);
-        if (c == null) {
-            throw new CustomerNotFoundException(String.valueOf(id));
-        }
-        return c;
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new CustomerNotFoundException(String.valueOf(id)));
     }
 
     public Page<Customer> search(String keyword, int page, int size) {
-        PageRequest pageable = new PageRequest(page, size, new Sort(Direction.ASC, "nameKana"));
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(Direction.ASC, "nameKana"));
         if (keyword == null || keyword.trim().isEmpty()) {
             return customerRepository.findAll(pageable);
         }

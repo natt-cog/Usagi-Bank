@@ -1,9 +1,9 @@
 package jp.usagi.bank.api;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.joda.time.LocalDate;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +20,7 @@ import jp.usagi.bank.service.AccountService;
 import jp.usagi.bank.service.StatementService;
 
 @RestController
-@RequestMapping(value = "/api/accounts", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(value = "/api/accounts", produces = MediaType.APPLICATION_JSON_VALUE)
 public class AccountApiController {
 
     private final AccountService accountService;

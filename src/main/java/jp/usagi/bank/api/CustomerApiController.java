@@ -18,7 +18,7 @@ import jp.usagi.bank.service.AccountService;
 import jp.usagi.bank.service.CustomerService;
 
 @RestController
-@RequestMapping(value = "/api/customers", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(value = "/api/customers", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CustomerApiController {
 
     private final CustomerService customerService;

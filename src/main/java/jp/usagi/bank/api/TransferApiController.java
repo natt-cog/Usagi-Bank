@@ -2,7 +2,7 @@ package jp.usagi.bank.api;
 
 import java.security.Principal;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,7 +17,7 @@ import jp.usagi.bank.api.dto.TransferResponse;
 import jp.usagi.bank.service.TransferService;
 
 @RestController
-@RequestMapping(value = "/api/transfers", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@RequestMapping(value = "/api/transfers", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TransferApiController {
 
     private final TransferService transferService;

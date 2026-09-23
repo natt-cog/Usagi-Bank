@@ -1,5 +1,7 @@
 package jp.usagi.bank.config;
 
+import jakarta.servlet.DispatcherType;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -43,7 +45,9 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/static/**", "/webjars/**", "/login", "/health").permitAll()
+                .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
+                .requestMatchers("/static/**", "/webjars/**", "/login", "/health",
+                        "/manage/health", "/manage/info").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/accounts/*/*/status").hasRole("ADMIN")
                 .requestMatchers("/transfer/**").hasAnyRole("TELLER", "ADMIN")

@@ -1,9 +1,10 @@
 package jp.usagi.bank.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.List;
 
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -54,8 +55,8 @@ public class InterestService {
             return BigDecimal.ZERO.setScale(2);
         }
         return balance.multiply(annualRatePercent)
-                .divide(HUNDRED, 10, BigDecimal.ROUND_DOWN)
-                .divide(DAYS_IN_YEAR, 2, BigDecimal.ROUND_DOWN);
+                .divide(HUNDRED, 10, RoundingMode.DOWN)
+                .divide(DAYS_IN_YEAR, 2, RoundingMode.DOWN);
     }
 
     public static boolean bearsInterest(Account account) {
@@ -87,12 +88,12 @@ public class InterestService {
         int count = 0;
         List<Account> accounts = accountRepository.findByStatusOrderByBranchCodeAscAccountNoAsc(AccountStatus.ACTIVE);
         for (Account account : accounts) {
-            BigDecimal gross = account.getAccruedInterest().setScale(0, BigDecimal.ROUND_DOWN);
+            BigDecimal gross = account.getAccruedInterest().setScale(0, RoundingMode.DOWN);
             if (gross.signum() <= 0) {
                 continue;
             }
-            BigDecimal tax = gross.multiply(TAX_RATE).setScale(0, BigDecimal.ROUND_DOWN);
-            String period = today.getMonthOfYear() == 2 ? "下期" : "上期";
+            BigDecimal tax = gross.multiply(TAX_RATE).setScale(0, RoundingMode.DOWN);
+            String period = today.getMonthValue() == 2 ? "下期" : "上期";
 
             account.setBalance(account.getBalance().add(gross));
             accountService.post(account, TransactionType.INTEREST, gross, "利息 " + period, null, "BATCH");

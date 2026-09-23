@@ -6,14 +6,14 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +44,7 @@ public class BatchFileService {
 
     public static final Charset HOST_CHARSET = Charset.forName("MS932");
     public static final int RECORD_LENGTH = 52;
-    private static final DateTimeFormatter YYYYMMDD = DateTimeFormat.forPattern("yyyyMMdd");
+    private static final DateTimeFormatter YYYYMMDD = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     private final AccountRepository accountRepository;
     private final BusinessDateService businessDateService;
@@ -65,7 +65,7 @@ public class BatchFileService {
         });
         Writer w = new OutputStreamWriter(out, HOST_CHARSET);
         LocalDate today = businessDateService.today();
-        w.write(StringUtils.rightPad("H" + YYYYMMDD.print(today), RECORD_LENGTH));
+        w.write(StringUtils.rightPad("H" + today.format(YYYYMMDD), RECORD_LENGTH));
         w.write('\n');
         BigDecimal balanceTotal = BigDecimal.ZERO;
         BigDecimal accruedTotal = BigDecimal.ZERO;
@@ -137,7 +137,7 @@ public class BatchFileService {
     }
 
     static String numeric(BigDecimal value, int totalDigits, int scale) {
-        String digits = value.setScale(scale, BigDecimal.ROUND_DOWN).movePointRight(scale).toPlainString();
+        String digits = value.setScale(scale, RoundingMode.DOWN).movePointRight(scale).toPlainString();
         if (digits.length() > totalDigits) {
             throw new BankingException("UB-9004", "桁あふれ: " + value);
         }

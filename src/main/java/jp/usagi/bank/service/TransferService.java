@@ -1,10 +1,9 @@
 package jp.usagi.bank.service;
 
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -30,8 +29,8 @@ import jp.usagi.bank.repository.TransactionRepository;
 @Service
 public class TransferService {
 
-    private static final DateTimeFormatter REF_DATE = DateTimeFormat.forPattern("yyyyMMdd");
-    private static final DateTimeFormatter ISO_DATE = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter REF_DATE = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final DateTimeFormatter ISO_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final BigDecimal FEE_THRESHOLD = new BigDecimal("30000");
     private static final BigDecimal FEE_LOW = new BigDecimal("110");
     private static final BigDecimal FEE_HIGH = new BigDecimal("220");
@@ -92,7 +91,7 @@ public class TransferService {
             throw new InsufficientFundsException(from, total);
         }
         BigDecimal alreadyToday = transactionRepository.sumTransferOutOn(from.getId(),
-                ISO_DATE.print(businessDateService.today()));
+                businessDateService.today().format(ISO_DATE));
         if (alreadyToday.add(amount).compareTo(dailyLimit) > 0) {
             throw new TransferLimitExceededException(dailyLimit);
         }
@@ -129,7 +128,7 @@ public class TransferService {
     }
 
     private String nextReference() {
-        return "T" + REF_DATE.print(businessDateService.today()) + String.format("%06d", sequence.getAndIncrement());
+        return "T" + businessDateService.today().format(REF_DATE) + String.format("%06d", sequence.getAndIncrement());
     }
 
     public static class TransferResult {

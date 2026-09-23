@@ -1,23 +1,20 @@
 package jp.usagi.bank.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 
-import org.joda.time.LocalDate;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.time.LocalDate;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import jp.usagi.bank.domain.Account;
 import jp.usagi.bank.xml.Statement;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
@@ -31,7 +28,7 @@ public class StatementServiceIT {
     @Test
     public void buildsStatementWithOpeningAndClosingBalance() {
         Account a = accountService.getAccount("001", "1000001");
-        Statement st = statementService.buildStatement(a, new LocalDate(2024, 1, 1), new LocalDate(2024, 1, 31));
+        Statement st = statementService.buildStatement(a, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31));
 
         assertEquals("001", st.getBranchCode());
         assertEquals("本店営業部", st.getBranchName());
@@ -44,13 +41,13 @@ public class StatementServiceIT {
     @Test
     public void marshalsToNamespacedXml() {
         Account a = accountService.getAccount("001", "1000001");
-        Statement st = statementService.buildStatement(a, new LocalDate(2024, 1, 1), new LocalDate(2024, 1, 31));
+        Statement st = statementService.buildStatement(a, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31));
         String xml = statementService.toXml(st);
 
-        assertTrue(xml, xml.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"));
-        assertTrue(xml, xml.contains("xmlns=\"" + Statement.NS + "\"") || xml.contains(":statement xmlns:"));
-        assertTrue(xml, xml.contains("<periodFrom>2024-01-01</periodFrom>") || xml.contains(":periodFrom>2024-01-01<"));
-        assertTrue(xml, xml.contains("ATM出金 丸の内"));
-        assertTrue(xml, xml.contains("ｶ)ｳｻｷﾞｼﾖｳｼﾞ"));
+        assertTrue(xml.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"), xml);
+        assertTrue(xml.contains("xmlns=\"" + Statement.NS + "\"") || xml.contains(":statement xmlns:"), xml);
+        assertTrue(xml.contains("<periodFrom>2024-01-01</periodFrom>") || xml.contains(":periodFrom>2024-01-01<"), xml);
+        assertTrue(xml.contains("ATM出金 丸の内"), xml);
+        assertTrue(xml.contains("ｶ)ｳｻｷﾞｼﾖｳｼﾞ"), xml);
     }
 }

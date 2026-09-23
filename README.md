@@ -48,7 +48,7 @@ curl -u admin:admin123 -o ACCOUNTS.DAT http://localhost:8080/usagi/api/batch/acc
 ## テスト (Tests)
 
 ```bash
-JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 mvn test        # 34 tests (JUnit 4, SpringRunner, H2 Oracle mode)
+JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 mvn test        # 39 tests (JUnit 4, SpringRunner, H2 Oracle mode)
 cd batch/cobol && ./run.sh                                     # compile & run UBEOD001, diff against expected/ACCRUED.DAT
 ```
 
@@ -59,6 +59,7 @@ cd batch/cobol && ./run.sh                                     # compile & run U
 | `BatchFileServiceIT` | 固定長レイアウト golden file (`src/test/resources/golden/ACCOUNTS.DAT`), MS932, トレーラ照合 |
 | `StatementServiceIT` | JAXB 明細 XML |
 | `BankingApiIT` | 認証・ロール別認可・エラーコード (`UB-xxxx`)・日本語ラベル |
+| `WebSecurityIT` | 画面フォーム POST のサーバ側ロール制御 (監査ロールは照会のみ), CSRF |
 | `CobolParityTest` | Java の利息計算と COBOL `UBEOD001` の出力が 1 銭単位で一致すること |
 
 Golden files are regenerated with `mvn test -Dgolden.argLine=-Dgolden.update=true` (see `BatchFileServiceIT`).

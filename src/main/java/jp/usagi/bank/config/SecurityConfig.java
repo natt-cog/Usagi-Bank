@@ -1,13 +1,19 @@
 package jp.usagi.bank.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 
 /**
  * 認証・認可設定.
@@ -19,61 +25,63 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Configuration
+    @Bean
     @Order(1)
-    public static class ApiSecurityConfig extends WebSecurityConfigurerAdapter {
-
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
-            http.antMatcher("/api/**")
-                .csrf().disable()
-                .authorizeRequests()
-                    .antMatchers("/api/batch/**").hasRole("ADMIN")
-                    .antMatchers(HttpMethod.GET, "/api/**").hasAnyRole("TELLER", "ADMIN", "AUDITOR")
-                    .antMatchers(HttpMethod.POST, "/api/transfers").hasAnyRole("TELLER", "ADMIN")
-                    .anyRequest().authenticated()
-                .and()
-                .httpBasic();
-        }
+    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/api/**")
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/batch/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("TELLER", "ADMIN", "AUDITOR")
+                .requestMatchers(HttpMethod.POST, "/api/transfers").hasAnyRole("TELLER", "ADMIN")
+                .anyRequest().authenticated())
+            .httpBasic(Customizer.withDefaults());
+        return http.build();
     }
 
-    @Configuration
+    @Bean
     @Order(2)
-    public static class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
-            http.authorizeRequests()
-                    .antMatchers("/static/**", "/webjars/**", "/login", "/health").permitAll()
-                    .antMatchers("/admin/**").hasRole("ADMIN")
-                    .antMatchers(HttpMethod.POST, "/accounts/*/*/status").hasRole("ADMIN")
-                    .antMatchers("/transfer/**").hasAnyRole("TELLER", "ADMIN")
-                    .antMatchers(HttpMethod.POST, "/accounts/**", "/customers/**").hasAnyRole("TELLER", "ADMIN")
-                    .anyRequest().authenticated()
-                .and()
-                .formLogin()
-                    .loginPage("/login")
-                    .defaultSuccessUrl("/dashboard", true)
-                    .failureUrl("/login?error")
-                    .permitAll()
-                .and()
-                .logout()
-                    .logoutUrl("/logout")
-                    .logoutSuccessUrl("/login?logout")
-                    .permitAll()
-                .and()
-                .headers().frameOptions().sameOrigin();
-        }
+    public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/static/**", "/webjars/**", "/login", "/health").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/accounts/*/*/status").hasRole("ADMIN")
+                .requestMatchers("/transfer/**").hasAnyRole("TELLER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/accounts/**", "/customers/**").hasAnyRole("TELLER", "ADMIN")
+                .anyRequest().authenticated())
+            .formLogin(form -> form
+                .loginPage("/login")
+                .defaultSuccessUrl("/dashboard", true)
+                .failureUrl("/login?error")
+                .permitAll())
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout")
+                .permitAll())
+            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
+        return http.build();
     }
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
         // TODO: 本番は行内LDAPへ切替 (2015年度課題)
-        auth.inMemoryAuthentication()
-            .withUser("teller").password("teller123").roles("TELLER")
-            .and()
-            .withUser("admin").password("admin123").roles("ADMIN", "TELLER")
-            .and()
-            .withUser("auditor").password("audit123").roles("AUDITOR");
+        UserDetails teller = User.withUsername("teller")
+                .password(passwordEncoder.encode("teller123"))
+                .roles("TELLER")
+                .build();
+        UserDetails admin = User.withUsername("admin")
+                .password(passwordEncoder.encode("admin123"))
+                .roles("ADMIN", "TELLER")
+                .build();
+        UserDetails auditor = User.withUsername("auditor")
+                .password(passwordEncoder.encode("audit123"))
+                .roles("AUDITOR")
+                .build();
+        return new InMemoryUserDetailsManager(teller, admin, auditor);
     }
 }

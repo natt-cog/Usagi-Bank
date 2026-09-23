@@ -1,0 +1,60 @@
+/* うさぎ銀行 勘定系オンライン - 端末用スタイル (IE8/9 互換) */
+body { margin: 0; font-family: "MS PGothic", "Meiryo", "Hiragino Kaku Gothic ProN", sans-serif; font-size: 13px; color: #222; background: #eef1f5; }
+a { color: #0b4f8a; }
+#header { background: #0b4f8a; color: #fff; padding: 8px 16px; overflow: hidden; }
+#header .brand { float: left; font-size: 18px; font-weight: bold; }
+#header .brand a { color: #fff; text-decoration: none; }
+#header .brand .env { font-size: 12px; color: #ffd966; margin-left: 12px; }
+#header .user { float: right; padding-top: 3px; }
+#header form.inline { display: inline; }
+button.link { background: none; border: none; color: #ffd966; text-decoration: underline; cursor: pointer; font-size: 13px; }
+#nav { background: #d9e2ec; padding: 6px 16px; border-bottom: 1px solid #b0bec9; }
+#nav a { margin-right: 18px; font-weight: bold; text-decoration: none; }
+#content { padding: 16px; }
+#footer { color: #777; font-size: 11px; text-align: center; padding: 16px; }
+h1 { font-size: 20px; margin: 0 0 12px; border-left: 6px solid #0b4f8a; padding-left: 10px; }
+h1 small, h2 small { font-size: 12px; color: #666; font-weight: normal; margin-left: 8px; }
+h2 { font-size: 15px; margin: 0 0 8px; }
+.row { overflow: hidden; }
+.panel { background: #fff; border: 1px solid #c5ced8; padding: 12px; margin-bottom: 14px; }
+.panel.half { float: left; width: 47%; margin-right: 1.5%; box-sizing: border-box; }
+table.grid { width: 100%; border-collapse: collapse; }
+table.grid th, table.grid td { border: 1px solid #c5ced8; padding: 4px 8px; }
+table.grid th { background: #e8eef4; text-align: left; cursor: pointer; }
+table.grid tr:nth-child(even) td { background: #f7f9fb; }
+table.grid td.empty { text-align: center; color: #888; }
+.num { text-align: right; font-family: Consolas, "MS Gothic", monospace; }
+.big { font-size: 18px; font-weight: bold; }
+table.kv th { text-align: left; background: #e8eef4; padding: 4px 8px; width: 140px; border: 1px solid #c5ced8; }
+table.kv td { padding: 4px 8px; border: 1px solid #c5ced8; }
+.kana { color: #666; font-size: 12px; }
+.flash { padding: 8px 12px; margin-bottom: 12px; border: 1px solid; }
+.flash.ok { background: #e6f4ea; border-color: #7bbf8a; color: #1e6b32; }
+.flash.ng { background: #fbe9e7; border-color: #e57373; color: #b71c1c; }
+form.search label, .inline-form label { margin-right: 12px; }
+.inline-form { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dotted #ccc; }
+button, a.button { padding: 4px 14px; border: 1px solid #7a8a99; background: #f4f6f8; cursor: pointer; font-size: 13px; text-decoration: none; color: #222; }
+button.primary { background: #0b4f8a; border-color: #083b66; color: #fff; }
+button.warn { background: #c0392b; border-color: #962d22; color: #fff; }
+input[type=text], input[type=password], select { padding: 3px 5px; border: 1px solid #8ea0b3; font-size: 13px; }
+input.amount { text-align: right; ime-mode: disabled; }
+fieldset { border: 1px solid #c5ced8; margin-bottom: 10px; }
+legend { font-weight: bold; }
+.lookup { color: #0b4f8a; margin-left: 10px; }
+.note { color: #666; font-size: 12px; }
+.req { color: #c0392b; font-size: 11px; margin-left: 4px; }
+.err { color: #b71c1c; font-size: 12px; }
+.pager { text-align: center; margin-top: 8px; }
+.pager a { margin: 0 8px; }
+.status-FROZEN td, td.status-FROZEN { color: #b26a00; }
+.status-CLOSED td, td.status-CLOSED { color: #999; text-decoration: line-through; }
+.kyc-PENDING { color: #b26a00; } .kyc-REJECTED { color: #b71c1c; } .kyc-VERIFIED { color: #1e6b32; }
+ol.top li { margin-bottom: 4px; }
+body.login { background: #0b4f8a; }
+.login-box { width: 360px; margin: 80px auto; background: #fff; padding: 24px 32px; border: 1px solid #083b66; }
+.login-box h1 { border: none; padding: 0; text-align: center; }
+.login-box h1 small { display: block; font-size: 12px; color: #666; margin-top: 4px; }
+.login-box label { display: block; margin: 10px 0; }
+.login-box input { width: 100%; box-sizing: border-box; }
+.login-box button { width: 100%; margin-top: 8px; }
+.hint { font-size: 11px; color: #888; text-align: center; }

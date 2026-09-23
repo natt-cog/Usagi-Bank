@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
+         updateCheck="false" name="usagiCache">
+
+    <defaultCache maxEntriesLocalHeap="1000" eternal="false"
+                  timeToIdleSeconds="300" timeToLiveSeconds="600"
+                  memoryStoreEvictionPolicy="LRU"/>
+
+    <!-- 店別残高合計 (ダッシュボード表示用) -->
+    <cache name="branchTotals" maxEntriesLocalHeap="100" eternal="false"
+           timeToLiveSeconds="60" memoryStoreEvictionPolicy="LRU"/>
+</ehcache>

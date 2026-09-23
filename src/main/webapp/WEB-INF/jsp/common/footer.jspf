@@ -1,0 +1,4 @@
+</div>
+<div id="footer">&copy; 2014-2018 Usagi Bank, Ltd. 勘定系オンライン v<c:out value="${appVersion}" default="2.7" /> / Tomcat 8.5 / Java 8</div>
+</body>
+</html>

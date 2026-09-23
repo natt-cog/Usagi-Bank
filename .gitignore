@@ -1,0 +1,22 @@
+target/
+*.class
+*.log
+*.war
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+.factorypath
+
+# COBOL batch work dir
+batch/cobol/work/
+
+# OS
+.DS_Store
+Thumbs.db

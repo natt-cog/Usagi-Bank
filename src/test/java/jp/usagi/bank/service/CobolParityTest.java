@@ -1,6 +1,6 @@
 package jp.usagi.bank.service;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import jp.usagi.bank.domain.Account;
 import jp.usagi.bank.domain.AccountStatus;
@@ -41,7 +41,7 @@ public class CobolParityTest {
                 expectedAccrued = expectedAccrued.add(InterestService.dailyInterest(a.getBalance(), a.getInterestRate()));
             }
             a.setAccruedInterest(expectedAccrued);
-            assertEquals("record " + (i + 1), cobol.get(i), BatchFileService.formatRecord(a));
+            assertEquals(cobol.get(i), BatchFileService.formatRecord(a), "record " + (i + 1));
             compared++;
         }
         assertEquals(15, compared);

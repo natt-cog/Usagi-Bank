@@ -226,8 +226,8 @@
                 <configuration>
                     <argLine>-Dfile.encoding=UTF-8 -Duser.timezone=Asia/Tokyo ${golden.argLine}</argLine>
                     <includes>
-                        <include>**/*Test.java</include>
-                        <include>**/*IT.java</include>
+                        <include>**/*Test.class</include>
+                        <include>**/*IT.class</include>
                     </includes>
                 </configuration>
             </plugin>

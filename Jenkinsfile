@@ -1,5 +1,5 @@
 // うさぎ銀行 勘定系オンライン  ビルドパイプライン
-// Jenkins 2.x (行内 CI サーバ: usagi-ci01)  --  2016/04 移行 (Ant → Maven)
+// Jenkins 2.x (行内 CI サーバ: usagi-ci01)  --  2016/04 移行 (Ant → Maven), 2026/10 Kotlin 化 (Java 8 → Kotlin 1.9, JVM 8 のまま)
 pipeline {
     agent { label 'rhel6-jdk8' }
 
@@ -68,8 +68,10 @@ pipeline {
         stage('Static Analysis') {
             when { branch 'develop' }
             steps {
-                // FindBugs 3.0.1 / Checkstyle 6.x  (SonarQube 5.6 へ送信)
-                sh 'mvn -B -s /opt/jenkins/settings.xml findbugs:findbugs checkstyle:checkstyle'
+                // ktlint (ktlint-maven-plugin, pom.xml で宣言済み) -- 違反があれば失敗. レポートファイルは生成しないので publisher は無し
+                sh 'mvn -B -s /opt/jenkins/settings.xml ktlint:check'
+                // SonarQube 5.6 には Kotlin アナライザが無い: Kotlin ソースは解析対象外のまま送信する.
+                // Kotlin coverage needs a SonarQube / sonar-kotlin upgrade (out of scope of the Kotlin migration).
                 sh 'mvn -B -s /opt/jenkins/settings.xml sonar:sonar -Dsonar.host.url=http://sonar.usagi.local:9000'
             }
         }
@@ -78,7 +80,7 @@ pipeline {
             when { branch 'release/*' }
             steps {
                 sh '''
-                  scp target/usagi-bank-*.war wasadmin@${WAS_HOST_STG}:/opt/IBM/deploy/
+                  scp target/usagi-bank.war wasadmin@${WAS_HOST_STG}:/opt/IBM/deploy/
                   ssh wasadmin@${WAS_HOST_STG} "/opt/IBM/WebSphere/AppServer/bin/wsadmin.sh -lang jython -f /opt/IBM/deploy/redeploy.py usagi-bank"
                 '''
             }

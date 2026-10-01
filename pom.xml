@@ -140,10 +140,14 @@
                         <plugin>spring</plugin>
                         <plugin>jpa</plugin>
                         <plugin>no-arg</plugin>
+                        <plugin>all-open</plugin>
                     </compilerPlugins>
                     <pluginOptions>
                         <option>no-arg:annotation=javax.xml.bind.annotation.XmlRootElement</option>
                         <option>no-arg:annotation=javax.xml.bind.annotation.XmlType</option>
+                        <option>all-open:annotation=javax.persistence.Entity</option>
+                        <option>all-open:annotation=javax.persistence.MappedSuperclass</option>
+                        <option>all-open:annotation=javax.persistence.Embeddable</option>
                     </pluginOptions>
                 </configuration>
                 <executions>

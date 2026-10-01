@@ -12,6 +12,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title><c:out value="${pageTitle}" default="うさぎ銀行" /> | うさぎ銀行 勘定系オンライン</title>
 <link rel="stylesheet" href="${ctx}/static/css/usagi.css">
+<script src="${ctx}/static/js/theme.js"></script>
 <script src="${ctx}/static/js/jquery-1.12.4.min.js"></script>
 <script src="${ctx}/static/js/usagi.js"></script>
 </head>
@@ -19,6 +20,7 @@
 <div id="header">
   <div class="brand"><a href="${ctx}/dashboard">うさぎ銀行 勘定系オンライン</a><span class="env">【検証環境】</span></div>
   <div class="user">
+    <button type="button" id="theme-toggle" class="link theme-toggle" aria-pressed="false">&#9790; ダークモード</button>
     <sec:authorize access="isAuthenticated()">
       <sec:authentication property="name" /> 様
       (<sec:authentication property="authorities" />)

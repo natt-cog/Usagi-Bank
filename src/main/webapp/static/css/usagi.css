@@ -58,3 +58,46 @@ body.login { background: #0b4f8a; }
 .login-box input { width: 100%; box-sizing: border-box; }
 .login-box button { width: 100%; margin-top: 8px; }
 .hint { font-size: 11px; color: #888; text-align: center; }
+
+/* テーマ切替ボタン */
+button.theme-toggle { margin-right: 14px; }
+.login-box .theme-bar { text-align: right; }
+.login-box button.theme-toggle { width: auto; margin: 0; padding: 0; color: #0b4f8a; font-size: 12px; }
+
+/* ダークモード (html.dark) */
+html.dark { background: #15191e; }
+html.dark body { color: #dde3ea; background: #15191e; }
+html.dark a { color: #7fb8ec; }
+html.dark #header { background: #0a2a47; }
+html.dark #header .brand a { color: #fff; }
+html.dark #nav { background: #222a33; border-bottom-color: #3a4552; }
+html.dark #footer { color: #8a96a3; }
+html.dark h1 { border-left-color: #4a90d0; }
+html.dark h1 small, html.dark h2 small { color: #9aa6b2; }
+html.dark .panel { background: #1e242b; border-color: #3a4552; }
+html.dark table.grid th, html.dark table.grid td,
+html.dark table.kv th, html.dark table.kv td { border-color: #3a4552; }
+html.dark table.grid th, html.dark table.kv th { background: #29323c; }
+html.dark table.grid tr:nth-child(even) td { background: #232a32; }
+html.dark table.grid td.empty { color: #8a96a3; }
+html.dark .kana, html.dark .note { color: #9aa6b2; }
+html.dark .flash.ok { background: #1c3324; border-color: #3f7a4f; color: #9fd9ac; }
+html.dark .flash.ng { background: #3a1f1d; border-color: #a04a44; color: #f2a29b; }
+html.dark .inline-form { border-bottom-color: #3a4552; }
+html.dark button, html.dark a.button { background: #2a333d; border-color: #56636f; color: #dde3ea; }
+html.dark button.primary { background: #1f6fb5; border-color: #2a7fc7; color: #fff; }
+html.dark button.warn { background: #b23a2e; border-color: #cf4b3e; color: #fff; }
+html.dark button.link { background: none; border: none; color: #ffd966; }
+html.dark input[type=text], html.dark input[type=password], html.dark select, html.dark textarea { background: #11161b; color: #dde3ea; border-color: #56636f; }
+html.dark fieldset { border-color: #3a4552; }
+html.dark .lookup { color: #7fb8ec; }
+html.dark .req { color: #ef7d71; }
+html.dark .err { color: #f2a29b; }
+html.dark .status-FROZEN td, html.dark td.status-FROZEN, html.dark .kyc-PENDING { color: #f0b45a; }
+html.dark .status-CLOSED td, html.dark td.status-CLOSED { color: #6f7b87; }
+html.dark .kyc-REJECTED { color: #f2a29b; }
+html.dark .kyc-VERIFIED { color: #8fd19e; }
+html.dark body.login { background: #0a2a47; }
+html.dark .login-box { background: #1e242b; border-color: #3a4552; }
+html.dark .login-box h1 small, html.dark .hint { color: #9aa6b2; }
+html.dark .login-box button.theme-toggle { background: none; border: none; color: #7fb8ec; }

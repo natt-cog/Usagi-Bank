@@ -120,6 +120,7 @@ class AccountNotFoundException(
 ## 11. スタイル
 
 - インデント 4 スペース、末尾カンマあり、ワイルドカード import 禁止 (ktlint 標準)。
+- ktlint 1.3.1 (`ktlint-maven-plugin` 3.3.0、ルールは `.editorconfig` の `ktlint_official`) を `verify` フェーズでチェックする。違反は `JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 mvn -B ktlint:format` で自動整形できる。
 - コメント・KDoc は Java の日本語コメントを移す。
 - `Joda-Time` / `java.util.Date` 等の型は変換時に置き換えない (ライブラリ移行は別 PR)。
 

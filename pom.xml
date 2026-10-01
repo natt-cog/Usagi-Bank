@@ -28,6 +28,7 @@
         <flyway.version>4.2.0</flyway.version>
         <commons-lang3.version>3.7</commons-lang3.version>
         <kotlin.version>1.9.25</kotlin.version>
+        <ktlint-maven-plugin.version>3.3.0</ktlint-maven-plugin.version>
     </properties>
 
     <dependencies>
@@ -207,6 +208,20 @@
                         <include>**/*IT.class</include>
                     </includes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.gantsign.maven</groupId>
+                <artifactId>ktlint-maven-plugin</artifactId>
+                <version>${ktlint-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>ktlint-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -1,7 +1,5 @@
 package jp.usagi.bank.service
 
-import java.math.BigDecimal
-import java.util.Date
 import jp.usagi.bank.domain.Account
 import jp.usagi.bank.domain.AccountStatus
 import jp.usagi.bank.domain.AccountType
@@ -18,6 +16,8 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
+import java.util.Date
 
 /** 口座業務 (開設・入出金・照会). */
 @Service
@@ -28,9 +28,11 @@ class AccountService(
     private val transactionRepository: TransactionRepository,
     private val businessDateService: BusinessDateService,
 ) {
-
     @Transactional(readOnly = true)
-    fun getAccount(branchCode: String?, accountNo: String?): Account {
+    fun getAccount(
+        branchCode: String?,
+        accountNo: String?,
+    ): Account {
         val account: Account? = accountRepository.findByBranchCodeAndAccountNo(branchCode, accountNo)
         return account ?: throw AccountNotFoundException(branchCode, accountNo)
     }
@@ -59,7 +61,11 @@ class AccountService(
     ): List<Account> = accountRepository.search(branchCode, type, status, minBalance, maxBalance, 200)
 
     @Transactional(readOnly = true)
-    fun listTransactions(account: Account, page: Int, size: Int): Page<Transaction> =
+    fun listTransactions(
+        account: Account,
+        page: Int,
+        size: Int,
+    ): Page<Transaction> =
         transactionRepository.findByAccountIdOrderByPostedAtDescIdDesc(account.id, PageRequest(page, size))
 
     @Transactional(readOnly = true)
@@ -84,11 +90,12 @@ class AccountService(
         account.branchCode = branchCode
         account.accountNo = nextAccountNo(branchCode)
         account.accountType = type
-        account.interestRate = if (type == AccountType.TIME_DEPOSIT) {
-            DEFAULT_TIME_DEPOSIT_RATE
-        } else {
-            DEFAULT_ORDINARY_RATE
-        }
+        account.interestRate =
+            if (type == AccountType.TIME_DEPOSIT) {
+                DEFAULT_TIME_DEPOSIT_RATE
+            } else {
+                DEFAULT_ORDINARY_RATE
+            }
         account.openedOn = businessDateService.todayAsDate()
         account = accountRepository.save(account)
 
@@ -99,7 +106,12 @@ class AccountService(
     }
 
     @CacheEvict(value = ["branchTotals"], allEntries = true)
-    fun deposit(account: Account, amount: BigDecimal?, description: String?, operatorId: String?): Transaction {
+    fun deposit(
+        account: Account,
+        amount: BigDecimal?,
+        description: String?,
+        operatorId: String?,
+    ): Transaction {
         val amt = requireValidAmount(amount)
         ensureActive(account)
         account.balance = account.balance.add(amt)
@@ -107,7 +119,12 @@ class AccountService(
     }
 
     @CacheEvict(value = ["branchTotals"], allEntries = true)
-    fun withdraw(account: Account, amount: BigDecimal?, description: String?, operatorId: String?): Transaction {
+    fun withdraw(
+        account: Account,
+        amount: BigDecimal?,
+        description: String?,
+        operatorId: String?,
+    ): Transaction {
         val amt = requireValidAmount(amount)
         ensureActive(account)
         if (account.balance < amt) {
@@ -117,7 +134,10 @@ class AccountService(
         return post(account, TransactionType.WITHDRAWAL, amt, description, null, operatorId)
     }
 
-    fun changeStatus(account: Account, status: AccountStatus) {
+    fun changeStatus(
+        account: Account,
+        status: AccountStatus,
+    ) {
         if (status == AccountStatus.CLOSED && account.balance.signum() != 0) {
             throw BankingException("UB-1004", "残高がある口座は解約できません: ${account.displayNo}")
         }

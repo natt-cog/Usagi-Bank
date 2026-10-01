@@ -22,7 +22,6 @@ class AccountApiController(
     private val accountService: AccountService,
     private val statementService: StatementService,
 ) {
-
     @GetMapping
     fun list(): List<AccountDto> {
         val result = ArrayList<AccountDto>()
@@ -36,9 +35,7 @@ class AccountApiController(
     fun get(
         @PathVariable("branchCode") branchCode: String,
         @PathVariable("accountNo") accountNo: String,
-    ): AccountDto {
-        return AccountDto.from(accountService.getAccount(branchCode, accountNo))
-    }
+    ): AccountDto = AccountDto.from(accountService.getAccount(branchCode, accountNo))
 
     @GetMapping("/{branchCode}/{accountNo}/transactions")
     fun transactions(

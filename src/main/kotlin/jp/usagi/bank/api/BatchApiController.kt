@@ -22,12 +22,12 @@ class BatchApiController(
     private val batchFileService: BatchFileService,
     private val endOfDayJob: EndOfDayJob,
 ) {
-
     @GetMapping(value = ["/accounts-file"], produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun exportAccounts(): ResponseEntity<ByteArray> {
         val out = ByteArrayOutputStream()
         batchFileService.exportAccounts(out)
-        return ResponseEntity.ok()
+        return ResponseEntity
+            .ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ACCOUNTS.DAT")
             .body(out.toByteArray())
     }
@@ -37,12 +37,10 @@ class BatchApiController(
         consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
         produces = [MediaType.APPLICATION_JSON_UTF8_VALUE],
     )
-    fun importAccrued(@RequestParam("file") file: MultipartFile): ImportResult {
-        return batchFileService.importAccrued(file.inputStream)
-    }
+    fun importAccrued(
+        @RequestParam("file") file: MultipartFile,
+    ): ImportResult = batchFileService.importAccrued(file.inputStream)
 
     @PostMapping(value = ["/eod"], produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
-    fun runEndOfDay(): EodResult {
-        return endOfDayJob.run()
-    }
+    fun runEndOfDay(): EodResult = endOfDayJob.run()
 }

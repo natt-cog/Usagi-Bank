@@ -1,12 +1,5 @@
 package jp.usagi.bank.service
 
-import java.io.StringWriter
-import java.math.BigDecimal
-import java.util.Date
-import javax.annotation.PostConstruct
-import javax.xml.bind.JAXBContext
-import javax.xml.bind.JAXBException
-import javax.xml.bind.Marshaller
 import jp.usagi.bank.domain.Account
 import jp.usagi.bank.domain.Branch
 import jp.usagi.bank.domain.Transaction
@@ -18,6 +11,13 @@ import jp.usagi.bank.xml.StatementEntry
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.StringWriter
+import java.math.BigDecimal
+import java.util.Date
+import javax.annotation.PostConstruct
+import javax.xml.bind.JAXBContext
+import javax.xml.bind.JAXBException
+import javax.xml.bind.Marshaller
 
 /** 取引明細書 (XML) 生成. */
 @Service
@@ -25,7 +25,6 @@ class StatementService(
     private val transactionRepository: TransactionRepository,
     private val branchRepository: BranchRepository,
 ) {
-
     private var jaxbContext: JAXBContext? = null
 
     @PostConstruct
@@ -35,7 +34,11 @@ class StatementService(
     }
 
     @Transactional(readOnly = true)
-    fun buildStatement(account: Account, from: LocalDate, to: LocalDate): Statement {
+    fun buildStatement(
+        account: Account,
+        from: LocalDate,
+        to: LocalDate,
+    ): Statement {
         val txns: List<Transaction> =
             transactionRepository.findByAccountIdAndValueDateBetweenOrderByPostedAtAscIdAsc(
                 account.id,
@@ -60,11 +63,12 @@ class StatementService(
             val type: TransactionType = checkNotNull(first.type)
             val balanceAfter: BigDecimal = checkNotNull(first.balanceAfter)
             val amount: BigDecimal = checkNotNull(first.amount)
-            opening = if (type.isCredit) {
-                balanceAfter.subtract(amount)
-            } else {
-                balanceAfter.add(amount)
-            }
+            opening =
+                if (type.isCredit) {
+                    balanceAfter.subtract(amount)
+                } else {
+                    balanceAfter.add(amount)
+                }
         }
         statement.openingBalance = opening
         statement.closingBalance = if (txns.isEmpty()) opening else txns[txns.size - 1].balanceAfter

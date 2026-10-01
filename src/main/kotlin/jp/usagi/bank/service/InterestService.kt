@@ -1,6 +1,5 @@
 package jp.usagi.bank.service
 
-import java.math.BigDecimal
 import jp.usagi.bank.domain.Account
 import jp.usagi.bank.domain.AccountStatus
 import jp.usagi.bank.domain.AccountType
@@ -11,6 +10,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 
 /**
  * 利息計算.
@@ -29,7 +29,6 @@ class InterestService(
     private val accountService: AccountService,
     private val businessDateService: BusinessDateService,
 ) {
-
     /** 日次利息積数. 全有効口座の未払利息を1日分加算する. */
     @Transactional
     fun accrueDaily(): Int {
@@ -95,11 +94,15 @@ class InterestService(
 
         /** 1日分の利息. 銭未満切捨. */
         @JvmStatic
-        fun dailyInterest(balance: BigDecimal, annualRatePercent: BigDecimal): BigDecimal {
+        fun dailyInterest(
+            balance: BigDecimal,
+            annualRatePercent: BigDecimal,
+        ): BigDecimal {
             if (balance.signum() <= 0) {
                 return BigDecimal.ZERO.setScale(2)
             }
-            return balance.multiply(annualRatePercent)
+            return balance
+                .multiply(annualRatePercent)
                 .divide(HUNDRED, 10, BigDecimal.ROUND_DOWN)
                 .divide(DAYS_IN_YEAR, 2, BigDecimal.ROUND_DOWN)
         }

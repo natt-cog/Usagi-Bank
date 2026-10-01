@@ -1,12 +1,5 @@
 package jp.usagi.bank.service
 
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.io.OutputStreamWriter
-import java.io.Writer
-import java.math.BigDecimal
-import java.nio.charset.Charset
 import jp.usagi.bank.domain.Account
 import jp.usagi.bank.domain.AccountStatus
 import jp.usagi.bank.domain.AccountType
@@ -17,6 +10,13 @@ import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.io.OutputStreamWriter
+import java.io.Writer
+import java.math.BigDecimal
+import java.nio.charset.Charset
 
 /**
  * ホスト連携ファイル (固定長) の入出力.
@@ -115,11 +115,13 @@ class BatchFileService(
         return ImportResult(processingDate, updated, skipped)
     }
 
-    class ImportResult @JvmOverloads constructor(
-        val processingDate: String? = null,
-        val updated: Int = 0,
-        val skipped: Int = 0,
-    )
+    class ImportResult
+        @JvmOverloads
+        constructor(
+            val processingDate: String? = null,
+            val updated: Int = 0,
+            val skipped: Int = 0,
+        )
 
     companion object {
         @JvmField
@@ -147,7 +149,11 @@ class BatchFileService(
 
         /** パッケージ内部用 */
         @JvmStatic
-        fun numeric(value: BigDecimal, totalDigits: Int, scale: Int): String {
+        fun numeric(
+            value: BigDecimal,
+            totalDigits: Int,
+            scale: Int,
+        ): String {
             val digits =
                 value.setScale(scale, BigDecimal.ROUND_DOWN).movePointRight(scale).toPlainString()
             if (digits.length > totalDigits) {

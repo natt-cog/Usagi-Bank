@@ -1,6 +1,5 @@
 package jp.usagi.bank.service
 
-import java.math.BigDecimal
 import jp.usagi.bank.xml.Statement
 import org.joda.time.LocalDate
 import org.junit.Assert.assertEquals
@@ -12,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 
 @RunWith(SpringRunner::class)
 @SpringBootTest

@@ -1,6 +1,5 @@
 package jp.usagi.bank.service
 
-import java.math.BigDecimal
 import jp.usagi.bank.domain.Account
 import jp.usagi.bank.domain.AccountStatus
 import jp.usagi.bank.domain.AccountType
@@ -8,6 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.math.BigDecimal
 
 /** 利息計算の単体テスト (円未満切捨て, 銭単位 2 桁). */
 class InterestServiceTest {
@@ -50,7 +50,11 @@ class InterestServiceTest {
     }
 
     companion object {
-        private fun account(type: AccountType, status: AccountStatus, rate: String): Account {
+        private fun account(
+            type: AccountType,
+            status: AccountStatus,
+            rate: String,
+        ): Account {
             val a = Account()
             a.accountType = type
             a.status = status

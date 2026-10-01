@@ -23,7 +23,6 @@ import javax.validation.constraints.Size
 @Entity
 @Table(name = "CUSTOMER")
 class Customer {
-
     @field:Id
     @field:GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "customer_seq")
     @field:SequenceGenerator(name = "customer_seq", sequenceName = "SEQ_CUSTOMER", allocationSize = 1)

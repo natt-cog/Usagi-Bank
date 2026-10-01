@@ -1,13 +1,13 @@
 package jp.usagi.bank.service
 
-import java.io.IOException
-import java.math.BigDecimal
 import jp.usagi.bank.domain.Account
 import jp.usagi.bank.domain.AccountStatus
 import jp.usagi.bank.domain.AccountType
 import org.apache.commons.io.IOUtils
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.io.IOException
+import java.math.BigDecimal
 
 /**
  * COBOL バッチ (batch/cobol/UBEOD001.cbl) と Java 利息計算の同値性テスト.

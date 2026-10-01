@@ -17,21 +17,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 
 @RestControllerAdvice(basePackages = ["jp.usagi.bank.api"])
 class ApiExceptionHandler {
-
     @ExceptionHandler(AccountNotFoundException::class, CustomerNotFoundException::class)
-    fun notFound(e: BankingException): ResponseEntity<ApiError> {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError(e.errorCode, e.message))
-    }
+    fun notFound(e: BankingException): ResponseEntity<ApiError> = ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError(e.errorCode, e.message))
 
     @ExceptionHandler(InsufficientFundsException::class, TransferLimitExceededException::class)
-    fun businessRule(e: BankingException): ResponseEntity<ApiError> {
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiError(e.errorCode, e.message))
-    }
+    fun businessRule(e: BankingException): ResponseEntity<ApiError> = ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiError(e.errorCode, e.message))
 
     @ExceptionHandler(BankingException::class)
-    fun banking(e: BankingException): ResponseEntity<ApiError> {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiError(e.errorCode, e.message))
-    }
+    fun banking(e: BankingException): ResponseEntity<ApiError> = ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiError(e.errorCode, e.message))
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun validation(e: MethodArgumentNotValidException): ResponseEntity<ApiError> {
@@ -45,7 +38,8 @@ class ApiExceptionHandler {
     @ExceptionHandler(Exception::class)
     fun unexpected(e: Exception): ResponseEntity<ApiError> {
         log.error("予期しないエラー", e)
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(ApiError("UB-9999", "システムエラーが発生しました"))
     }
 

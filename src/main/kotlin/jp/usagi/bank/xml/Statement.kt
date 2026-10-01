@@ -14,7 +14,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter
 @XmlRootElement(name = "statement", namespace = Statement.NS)
 @XmlAccessorType(XmlAccessType.FIELD)
 class Statement {
-
     @field:XmlAttribute(name = "generatedAt")
     @field:XmlJavaTypeAdapter(DateTimeAdapter::class)
     var generatedAt: Date? = null

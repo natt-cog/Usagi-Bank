@@ -18,16 +18,17 @@ data class CustomerDto(
 ) {
     companion object {
         @JvmStatic
-        fun from(c: Customer): CustomerDto = CustomerDto(
-            id = c.id,
-            cifNo = c.cifNo,
-            nameKanji = c.nameKanji,
-            nameKana = c.nameKana,
-            birthDate = c.birthDate,
-            postalCode = c.postalCode,
-            address = c.address,
-            phone = c.phone,
-            kycStatus = c.kycStatus.name,
-        )
+        fun from(c: Customer): CustomerDto =
+            CustomerDto(
+                id = c.id,
+                cifNo = c.cifNo,
+                nameKanji = c.nameKanji,
+                nameKana = c.nameKana,
+                birthDate = c.birthDate,
+                postalCode = c.postalCode,
+                address = c.address,
+                phone = c.phone,
+                kycStatus = c.kycStatus.name,
+            )
     }
 }

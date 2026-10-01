@@ -1,10 +1,10 @@
 package jp.usagi.bank.service
 
-import java.util.Date
 import org.joda.time.DateTimeConstants
 import org.joda.time.DateTimeZone
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Service
+import java.util.Date
 
 /**
  * 営業日管理.
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service
  */
 @Service
 class BusinessDateService {
-
     private var overridden: LocalDate? = null
 
     fun today(): LocalDate = overridden ?: LocalDate(JST)

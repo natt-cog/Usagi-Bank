@@ -9,7 +9,6 @@ import javax.persistence.Table
 @Entity
 @Table(name = "BRANCH")
 class Branch {
-
     @field:Id
     @field:Column(name = "BRANCH_CODE", length = 3)
     var code: String? = null

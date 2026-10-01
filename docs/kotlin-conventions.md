@@ -1,13 +1,13 @@
 # Kotlin conversion conventions (Java → Kotlin, 1:1 port)
 
-Rules every conversion ticket on the `kotlin-migration` branch follows. Scope of this migration is **language only**: Java 8 / Spring Boot 1.5.22 / JUnit 4 / Joda-Time / `javax.*` all stay, behaviour must stay byte-identical (the 39 tests and the golden files are the contract). The toolchain is Kotlin 1.9.25 with the `spring` and `jpa` compiler plugins and `-Xjsr305=strict` (see `pom.xml`).
+Rules every conversion ticket on the `kotlin-migration` branch followed. The port is complete: the build is Kotlin-only (`src/main/kotlin` / `src/test/kotlin`, no `src/main/java`), so the "mixed codebase" notes below describe the intermediate state — the interop rules themselves still apply because JSP EL, Spring, JPA, JAXB and the libraries are Java callers. Scope of this migration is **language only**: Java 8 / Spring Boot 1.5.22 / JUnit 4 / Joda-Time / `javax.*` all stay, behaviour must stay byte-identical (the 39 tests and the golden files are the contract). The toolchain is Kotlin 1.9.25 with the `spring` and `jpa` compiler plugins and `-Xjsr305=strict` (see `pom.xml`).
 
 ## File layout and PR shape
 
 - Kotlin sources live in `src/main/kotlin` / `src/test/kotlin`, **same package** (`jp.usagi.bank.…`), one class per file, same file name as the Java class (`Account.java` → `Account.kt`).
 - Delete the Java file in the same PR. One package (e.g. `domain`) or one test class per PR, so each PR is reviewable and `mvn -B test` stays green at every merge.
 - Surefire's `**/*Test.java` / `**/*IT.java` includes are matched against class files, so converted tests keep their `*Test` / `*IT` names and need no build change.
-- Kotlin compiles first and `javac` then sees the Kotlin classes, so remaining Java callers (and JSPs via `${account.displayNo}`) keep working as long as the JVM signatures are preserved (see *Interop*).
+- During the migration Kotlin compiled first and `javac` then saw the Kotlin classes, so remaining Java callers kept working as long as the JVM signatures were preserved; JSPs (`${account.displayNo}`) still rely on those signatures (see *Interop*).
 
 ## Entities (`domain/`)
 

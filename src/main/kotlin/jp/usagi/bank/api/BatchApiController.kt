@@ -1,7 +1,9 @@
 package jp.usagi.bank.api
 
-import java.io.ByteArrayOutputStream
-
+import jp.usagi.bank.batch.EndOfDayJob
+import jp.usagi.bank.batch.EndOfDayJob.EodResult
+import jp.usagi.bank.service.BatchFileService
+import jp.usagi.bank.service.BatchFileService.ImportResult
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -11,11 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-
-import jp.usagi.bank.batch.EndOfDayJob
-import jp.usagi.bank.batch.EndOfDayJob.EodResult
-import jp.usagi.bank.service.BatchFileService
-import jp.usagi.bank.service.BatchFileService.ImportResult
+import java.io.ByteArrayOutputStream
 
 /** ホスト連携・バッチ手動起動 (管理者専用). */
 @RestController
@@ -30,12 +28,15 @@ class BatchApiController(
         val out = ByteArrayOutputStream()
         batchFileService.exportAccounts(out)
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ACCOUNTS.DAT")
-                .body(out.toByteArray())
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ACCOUNTS.DAT")
+            .body(out.toByteArray())
     }
 
-    @PostMapping(value = ["/accrued-file"], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
-            produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
+    @PostMapping(
+        value = ["/accrued-file"],
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
+        produces = [MediaType.APPLICATION_JSON_UTF8_VALUE],
+    )
     fun importAccrued(@RequestParam("file") file: MultipartFile): ImportResult {
         return batchFileService.importAccrued(file.inputStream)
     }

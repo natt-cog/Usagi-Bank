@@ -1,5 +1,11 @@
 package jp.usagi.bank.api
 
+import jp.usagi.bank.api.dto.ApiError
+import jp.usagi.bank.service.AccountNotFoundException
+import jp.usagi.bank.service.BankingException
+import jp.usagi.bank.service.CustomerNotFoundException
+import jp.usagi.bank.service.InsufficientFundsException
+import jp.usagi.bank.service.TransferLimitExceededException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -9,19 +15,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 
-import jp.usagi.bank.api.dto.ApiError
-import jp.usagi.bank.service.AccountNotFoundException
-import jp.usagi.bank.service.BankingException
-import jp.usagi.bank.service.CustomerNotFoundException
-import jp.usagi.bank.service.InsufficientFundsException
-import jp.usagi.bank.service.TransferLimitExceededException
-
 @RestControllerAdvice(basePackages = ["jp.usagi.bank.api"])
 class ApiExceptionHandler {
-
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(ApiExceptionHandler::class.java)
-    }
 
     @ExceptionHandler(AccountNotFoundException::class, CustomerNotFoundException::class)
     fun notFound(e: BankingException): ResponseEntity<ApiError> {
@@ -51,6 +46,10 @@ class ApiExceptionHandler {
     fun unexpected(e: Exception): ResponseEntity<ApiError> {
         log.error("予期しないエラー", e)
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiError("UB-9999", "システムエラーが発生しました"))
+            .body(ApiError("UB-9999", "システムエラーが発生しました"))
+    }
+
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(ApiExceptionHandler::class.java)
     }
 }

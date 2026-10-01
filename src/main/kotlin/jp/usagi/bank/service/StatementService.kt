@@ -1,18 +1,5 @@
 package jp.usagi.bank.service
 
-import java.io.StringWriter
-import java.math.BigDecimal
-import java.util.Date
-
-import javax.annotation.PostConstruct
-import javax.xml.bind.JAXBContext
-import javax.xml.bind.JAXBException
-import javax.xml.bind.Marshaller
-
-import org.joda.time.LocalDate
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-
 import jp.usagi.bank.domain.Account
 import jp.usagi.bank.domain.Branch
 import jp.usagi.bank.domain.Transaction
@@ -20,12 +7,22 @@ import jp.usagi.bank.repository.BranchRepository
 import jp.usagi.bank.repository.TransactionRepository
 import jp.usagi.bank.xml.Statement
 import jp.usagi.bank.xml.StatementEntry
+import org.joda.time.LocalDate
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.io.StringWriter
+import java.math.BigDecimal
+import java.util.Date
+import javax.annotation.PostConstruct
+import javax.xml.bind.JAXBContext
+import javax.xml.bind.JAXBException
+import javax.xml.bind.Marshaller
 
 /** 取引明細書 (XML) 生成. */
 @Service
 class StatementService(
     private val transactionRepository: TransactionRepository,
-    private val branchRepository: BranchRepository
+    private val branchRepository: BranchRepository,
 ) {
 
     private lateinit var jaxbContext: JAXBContext
@@ -39,7 +36,10 @@ class StatementService(
     @Transactional(readOnly = true)
     fun buildStatement(account: Account, from: LocalDate, to: LocalDate): Statement {
         val txns: List<Transaction> = transactionRepository.findByAccountIdAndValueDateBetweenOrderByPostedAtAscIdAsc(
-            account.id, from.toDate(), to.toDate())
+            account.id,
+            from.toDate(),
+            to.toDate(),
+        )
         val branch: Branch? = branchRepository.findOne(account.branchCode)
 
         val st = Statement()
@@ -55,10 +55,11 @@ class StatementService(
         var opening: BigDecimal = account.balance
         if (txns.isNotEmpty()) {
             val first = txns[0]
-            opening = if (first.type.isCredit)
+            opening = if (first.type.isCredit) {
                 first.balanceAfter.subtract(first.amount)
-            else
+            } else {
                 first.balanceAfter.add(first.amount)
+            }
         }
         st.openingBalance = opening
         st.closingBalance = if (txns.isEmpty()) opening else txns[txns.size - 1].balanceAfter

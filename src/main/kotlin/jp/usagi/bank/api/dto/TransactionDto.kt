@@ -1,11 +1,9 @@
 package jp.usagi.bank.api.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
+import jp.usagi.bank.domain.Transaction
 import java.math.BigDecimal
 import java.util.Date
-
-import com.fasterxml.jackson.annotation.JsonFormat
-
-import jp.usagi.bank.domain.Transaction
 
 data class TransactionDto(
     val id: Long?,
@@ -19,7 +17,7 @@ data class TransactionDto(
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Tokyo")
     val valueDate: Date,
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Tokyo")
-    val postedAt: Date
+    val postedAt: Date,
 ) {
 
     companion object {
@@ -34,7 +32,7 @@ data class TransactionDto(
             description = t.description,
             referenceNo = t.referenceNo,
             valueDate = t.valueDate,
-            postedAt = t.postedAt
+            postedAt = t.postedAt,
         )
     }
 }

@@ -1,16 +1,13 @@
 package jp.usagi.bank.service
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-
-import java.math.BigDecimal
-
-import org.junit.Test
-
 import jp.usagi.bank.domain.Account
 import jp.usagi.bank.domain.AccountStatus
 import jp.usagi.bank.domain.AccountType
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import java.math.BigDecimal
 
 /** 利息計算の単体テスト (円未満切捨て, 銭単位 2 桁). */
 class InterestServiceTest {
@@ -31,8 +28,10 @@ class InterestServiceTest {
 
     @Test
     fun dailyInterest_zeroBalance() {
-        assertEquals(BigDecimal("0.00"),
-                InterestService.dailyInterest(BigDecimal.ZERO, BigDecimal("0.0010")))
+        assertEquals(
+            BigDecimal("0.00"),
+            InterestService.dailyInterest(BigDecimal.ZERO, BigDecimal("0.0010")),
+        )
     }
 
     @Test

@@ -1,11 +1,9 @@
 package jp.usagi.bank.api.dto
 
+import com.fasterxml.jackson.annotation.JsonFormat
+import jp.usagi.bank.domain.Account
 import java.math.BigDecimal
 import java.util.Date
-
-import com.fasterxml.jackson.annotation.JsonFormat
-
-import jp.usagi.bank.domain.Account
 
 data class AccountDto(
     val id: Long?,
@@ -19,7 +17,7 @@ data class AccountDto(
     val balance: BigDecimal,
     val interestRate: BigDecimal,
     @field:JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Tokyo")
-    val openedOn: Date
+    val openedOn: Date,
 ) {
 
     companion object {
@@ -35,7 +33,7 @@ data class AccountDto(
             customerName = a.customer.nameKanji,
             balance = a.balance,
             interestRate = a.interestRate,
-            openedOn = a.openedOn
+            openedOn = a.openedOn,
         )
     }
 }

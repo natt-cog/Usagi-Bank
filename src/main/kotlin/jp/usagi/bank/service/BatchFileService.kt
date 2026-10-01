@@ -1,13 +1,8 @@
 package jp.usagi.bank.service
 
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.io.OutputStreamWriter
-import java.io.Writer
-import java.math.BigDecimal
-import java.nio.charset.Charset
-
+import jp.usagi.bank.domain.Account
+import jp.usagi.bank.domain.AccountStatus
+import jp.usagi.bank.repository.AccountRepository
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
 import org.joda.time.LocalDate
@@ -15,10 +10,13 @@ import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-
-import jp.usagi.bank.domain.Account
-import jp.usagi.bank.domain.AccountStatus
-import jp.usagi.bank.repository.AccountRepository
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.io.OutputStreamWriter
+import java.io.Writer
+import java.math.BigDecimal
+import java.nio.charset.Charset
 
 /**
  * ホスト連携ファイル (固定長) の入出力.
@@ -41,7 +39,7 @@ import jp.usagi.bank.repository.AccountRepository
 @Service
 class BatchFileService(
     private val accountRepository: AccountRepository,
-    private val businessDateService: BusinessDateService
+    private val businessDateService: BusinessDateService,
 ) {
 
     @Transactional(readOnly = true)
@@ -61,8 +59,13 @@ class BatchFileService(
             balanceTotal = balanceTotal.add(a.balance)
             accruedTotal = accruedTotal.add(a.accruedInterest)
         }
-        w.write(StringUtils.rightPad("T" + StringUtils.leftPad(accounts.size.toString(), 9, '0')
-                + numeric(balanceTotal, 17, 0) + numeric(accruedTotal, 17, 2), RECORD_LENGTH))
+        w.write(
+            StringUtils.rightPad(
+                "T" + StringUtils.leftPad(accounts.size.toString(), 9, '0') +
+                    numeric(balanceTotal, 17, 0) + numeric(accruedTotal, 17, 2),
+                RECORD_LENGTH,
+            ),
+        )
         w.write('\n'.code)
         w.flush()
         return accounts.size
@@ -104,8 +107,11 @@ class BatchFileService(
             }
         }
         if (declaredCount >= 0 && declaredCount != (result.updated + result.skipped).toLong()) {
-            throw BankingException("UB-9003", "トレーラ件数不一致: 宣言=" + declaredCount
-                    + " 実績=" + (result.updated + result.skipped))
+            throw BankingException(
+                "UB-9003",
+                "トレーラ件数不一致: 宣言=" + declaredCount +
+                    " 実績=" + (result.updated + result.skipped),
+            )
         }
         return result
     }

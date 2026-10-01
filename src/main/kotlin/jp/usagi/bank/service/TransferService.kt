@@ -1,8 +1,10 @@
 package jp.usagi.bank.service
 
-import java.math.BigDecimal
-import java.util.concurrent.atomic.AtomicLong
-
+import jp.usagi.bank.domain.Account
+import jp.usagi.bank.domain.Transaction
+import jp.usagi.bank.domain.TransactionType
+import jp.usagi.bank.repository.AccountRepository
+import jp.usagi.bank.repository.TransactionRepository
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import org.springframework.beans.factory.annotation.Value
@@ -10,12 +12,8 @@ import org.springframework.cache.annotation.CacheEvict
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
-
-import jp.usagi.bank.domain.Account
-import jp.usagi.bank.domain.Transaction
-import jp.usagi.bank.domain.TransactionType
-import jp.usagi.bank.repository.AccountRepository
-import jp.usagi.bank.repository.TransactionRepository
+import java.math.BigDecimal
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * 行内振込.
@@ -33,7 +31,7 @@ class TransferService(
     private val transactionRepository: TransactionRepository,
     private val accountService: AccountService,
     private val businessDateService: BusinessDateService,
-    @Value("\${usagi.transfer.daily-limit:1000000}") val dailyLimit: BigDecimal
+    @Value("\${usagi.transfer.daily-limit:1000000}") val dailyLimit: BigDecimal,
 ) {
 
     private val sequence = AtomicLong(1)
@@ -48,8 +46,13 @@ class TransferService(
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @CacheEvict(value = ["branchTotals"], allEntries = true)
     fun transfer(
-        fromBranch: String, fromNo: String, toBranch: String, toNo: String,
-        amount: BigDecimal?, description: String?, operatorId: String?
+        fromBranch: String,
+        fromNo: String,
+        toBranch: String,
+        toNo: String,
+        amount: BigDecimal?,
+        description: String?,
+        operatorId: String?,
     ): TransferResult {
         AccountService.validateAmount(amount)
         val amt = requireNotNull(amount) { "validateAmount rejects null amounts" }
@@ -80,7 +83,8 @@ class TransferService(
             throw InsufficientFundsException(from, total)
         }
         val alreadyToday: BigDecimal = transactionRepository.sumTransferOutOn(
-            from.id, ISO_DATE.print(businessDateService.today())
+            from.id,
+            ISO_DATE.print(businessDateService.today()),
         )
         if (alreadyToday.add(amt).compareTo(dailyLimit) > 0) {
             throw TransferLimitExceededException(dailyLimit)
@@ -92,8 +96,12 @@ class TransferService(
 
         from.balance = from.balance.subtract(amt)
         val debit = accountService.post(
-            from, TransactionType.TRANSFER_OUT, amt,
-            "振込 " + payeeName + (if (description == null) "" else " $description"), ref, operatorId
+            from,
+            TransactionType.TRANSFER_OUT,
+            amt,
+            "振込 " + payeeName + (if (description == null) "" else " $description"),
+            ref,
+            operatorId,
         )
         var feeTxn: Transaction? = null
         if (fee.signum() > 0) {
@@ -102,8 +110,12 @@ class TransferService(
         }
         to.balance = to.balance.add(amt)
         val credit = accountService.post(
-            to, TransactionType.TRANSFER_IN, amt,
-            "振込 " + payerName + (if (description == null) "" else " $description"), ref, operatorId
+            to,
+            TransactionType.TRANSFER_IN,
+            amt,
+            "振込 " + payerName + (if (description == null) "" else " $description"),
+            ref,
+            operatorId,
         )
 
         return TransferResult(ref, debit, feeTxn, credit)
@@ -121,7 +133,7 @@ class TransferService(
         val referenceNo: String,
         val debit: Transaction,
         val fee: Transaction?,
-        val credit: Transaction
+        val credit: Transaction,
     ) {
         val feeAmount: BigDecimal
             get() = fee?.amount ?: BigDecimal.ZERO

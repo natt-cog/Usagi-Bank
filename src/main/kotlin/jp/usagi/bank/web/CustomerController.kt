@@ -1,10 +1,12 @@
 package jp.usagi.bank.web
 
-import java.math.BigDecimal
-import java.security.Principal
-
-import javax.validation.Valid
-
+import jp.usagi.bank.domain.AccountType
+import jp.usagi.bank.domain.Customer
+import jp.usagi.bank.domain.KycStatus
+import jp.usagi.bank.repository.BranchRepository
+import jp.usagi.bank.service.AccountService
+import jp.usagi.bank.service.BankingException
+import jp.usagi.bank.service.CustomerService
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
@@ -15,21 +17,16 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
-
-import jp.usagi.bank.domain.AccountType
-import jp.usagi.bank.domain.Customer
-import jp.usagi.bank.domain.KycStatus
-import jp.usagi.bank.repository.BranchRepository
-import jp.usagi.bank.service.AccountService
-import jp.usagi.bank.service.BankingException
-import jp.usagi.bank.service.CustomerService
+import java.math.BigDecimal
+import java.security.Principal
+import javax.validation.Valid
 
 @Controller
 @RequestMapping("/customers")
 class CustomerController(
     private val customerService: CustomerService,
     private val accountService: AccountService,
-    private val branchRepository: BranchRepository
+    private val branchRepository: BranchRepository,
 ) {
 
     @GetMapping
@@ -49,8 +46,10 @@ class CustomerController(
 
     @PostMapping
     fun create(
-        @Valid @ModelAttribute("customer") customer: Customer, binding: BindingResult,
-        model: Model, ra: RedirectAttributes
+        @Valid @ModelAttribute("customer") customer: Customer,
+        binding: BindingResult,
+        model: Model,
+        ra: RedirectAttributes,
     ): String {
         if (binding.hasErrors()) {
             return "customers/form"
@@ -78,9 +77,12 @@ class CustomerController(
 
     @PostMapping("/{cifNo}/accounts")
     fun openAccount(
-        @PathVariable cifNo: String, @RequestParam branchCode: String,
-        @RequestParam type: AccountType, @RequestParam(required = false) initialDeposit: BigDecimal?,
-        principal: Principal, ra: RedirectAttributes
+        @PathVariable cifNo: String,
+        @RequestParam branchCode: String,
+        @RequestParam type: AccountType,
+        @RequestParam(required = false) initialDeposit: BigDecimal?,
+        principal: Principal,
+        ra: RedirectAttributes,
     ): String {
         try {
             accountService.openAccount(cifNo, branchCode, type, initialDeposit, principal.name)

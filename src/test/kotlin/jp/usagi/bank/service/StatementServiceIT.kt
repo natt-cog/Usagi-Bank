@@ -1,11 +1,10 @@
 package jp.usagi.bank.service
 
+import jp.usagi.bank.domain.Account
+import jp.usagi.bank.xml.Statement
+import org.joda.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-
-import java.math.BigDecimal
-
-import org.joda.time.LocalDate
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,9 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.transaction.annotation.Transactional
-
-import jp.usagi.bank.domain.Account
-import jp.usagi.bank.xml.Statement
+import java.math.BigDecimal
 
 @RunWith(SpringRunner::class)
 @SpringBootTest
@@ -25,6 +22,7 @@ class StatementServiceIT {
 
     @Autowired
     lateinit var statementService: StatementService
+
     @Autowired
     lateinit var accountService: AccountService
 

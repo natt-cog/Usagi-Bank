@@ -1,8 +1,9 @@
 package jp.usagi.bank.domain
 
+import org.hibernate.validator.constraints.NotBlank
+import org.springframework.format.annotation.DateTimeFormat
 import java.util.ArrayList
 import java.util.Date
-
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EnumType
@@ -18,9 +19,6 @@ import javax.persistence.TemporalType
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
-
-import org.hibernate.validator.constraints.NotBlank
-import org.springframework.format.annotation.DateTimeFormat
 
 /**
  * 顧客 (CIF).

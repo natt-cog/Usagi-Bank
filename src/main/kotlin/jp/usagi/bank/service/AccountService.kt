@@ -1,16 +1,5 @@
 package jp.usagi.bank.service
 
-import java.math.BigDecimal
-import java.util.Date
-
-import org.apache.commons.lang3.StringUtils
-import org.springframework.cache.annotation.CacheEvict
-import org.springframework.cache.annotation.Cacheable
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-
 import jp.usagi.bank.domain.Account
 import jp.usagi.bank.domain.AccountStatus
 import jp.usagi.bank.domain.AccountType
@@ -20,6 +9,15 @@ import jp.usagi.bank.domain.TransactionType
 import jp.usagi.bank.repository.AccountRepository
 import jp.usagi.bank.repository.CustomerRepository
 import jp.usagi.bank.repository.TransactionRepository
+import org.apache.commons.lang3.StringUtils
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
+import java.util.Date
 
 /** 口座業務 (開設・入出金・照会). */
 @Service
@@ -28,7 +26,7 @@ class AccountService(
     private val accountRepository: AccountRepository,
     private val customerRepository: CustomerRepository,
     private val transactionRepository: TransactionRepository,
-    private val businessDateService: BusinessDateService
+    private val businessDateService: BusinessDateService,
 ) {
 
     @Transactional(readOnly = true)
@@ -53,8 +51,11 @@ class AccountService(
 
     @Transactional(readOnly = true)
     fun search(
-        branchCode: String?, type: AccountType?, status: AccountStatus?,
-        minBalance: BigDecimal?, maxBalance: BigDecimal?
+        branchCode: String?,
+        type: AccountType?,
+        status: AccountStatus?,
+        minBalance: BigDecimal?,
+        maxBalance: BigDecimal?,
     ): List<Account> = accountRepository.search(branchCode, type, status, minBalance, maxBalance, 200)
 
     @Transactional(readOnly = true)
@@ -67,7 +68,11 @@ class AccountService(
 
     @CacheEvict(value = ["branchTotals"], allEntries = true)
     fun openAccount(
-        cifNo: String, branchCode: String, type: AccountType, initialDeposit: BigDecimal?, operatorId: String?
+        cifNo: String,
+        branchCode: String,
+        type: AccountType,
+        initialDeposit: BigDecimal?,
+        operatorId: String?,
     ): Account {
         val customer: Customer = customerRepository.findByCifNo(cifNo) ?: throw CustomerNotFoundException(cifNo)
         var account = Account()
@@ -114,8 +119,12 @@ class AccountService(
 
     /** 明細を元帳へ記帳する. 残高は呼び出し側で更新済みであること. */
     fun post(
-        account: Account, type: TransactionType, amount: BigDecimal, description: String?,
-        referenceNo: String?, operatorId: String?
+        account: Account,
+        type: TransactionType,
+        amount: BigDecimal,
+        description: String?,
+        referenceNo: String?,
+        operatorId: String?,
     ): Transaction {
         val today: Date = businessDateService.todayAsDate()
         val txn = Transaction()

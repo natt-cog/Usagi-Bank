@@ -2,7 +2,6 @@ package jp.usagi.bank.xml
 
 import java.text.SimpleDateFormat
 import java.util.Date
-
 import javax.xml.bind.annotation.adapters.XmlAdapter
 
 class DateTimeAdapter : XmlAdapter<String?, Date?>() {

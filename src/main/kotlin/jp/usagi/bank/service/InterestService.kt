@@ -1,17 +1,15 @@
 package jp.usagi.bank.service
 
-import java.math.BigDecimal
-
-import org.joda.time.LocalDate
-import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-
 import jp.usagi.bank.domain.Account
 import jp.usagi.bank.domain.AccountStatus
 import jp.usagi.bank.domain.AccountType
 import jp.usagi.bank.domain.TransactionType
 import jp.usagi.bank.repository.AccountRepository
+import org.joda.time.LocalDate
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 
 /**
  * 利息計算.
@@ -30,7 +28,7 @@ import jp.usagi.bank.repository.AccountRepository
 class InterestService(
     private val accountRepository: AccountRepository,
     private val accountService: AccountService,
-    private val businessDateService: BusinessDateService
+    private val businessDateService: BusinessDateService,
 ) {
 
     /** 日次利息積数. 全有効口座の未払利息を1日分加算する. */
@@ -83,7 +81,9 @@ class InterestService(
         private val log = LoggerFactory.getLogger(InterestService::class.java)
 
         @JvmField val DAYS_IN_YEAR = BigDecimal("365")
+
         @JvmField val HUNDRED = BigDecimal("100")
+
         @JvmField val TAX_RATE = BigDecimal("0.20315")
 
         /** 1日分の利息. 銭未満切捨. */

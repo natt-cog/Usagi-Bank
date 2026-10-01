@@ -11,7 +11,7 @@ Java 8 / Spring Boot 1.5.22 のまま、ソースを段階的に Kotlin へ置�
 | Spring Boot | 1.5.22 据え置き (`javax.*` のまま) |
 | Kotlin | 1.9.25, `jvmTarget` 1.8 (`pom.xml` の `kotlin.version`) |
 | コンパイラプラグイン | `spring` (all-open プリセット), `jpa` (no-arg プリセット), `no-arg` (JAXB の `@XmlRootElement` / `@XmlType`) |
-| ビルド順 | `kotlin-maven-plugin` → `maven-compiler-plugin`。Kotlin と Java は相互参照可能 |
+| ビルド | Kotlin 専用。`kotlin-maven-plugin` が `src/main/kotlin` / `src/test/kotlin` をコンパイル (`maven-compiler-plugin` の既定実行は無効化) |
 | COBOL バッチ | `batch/cobol` は変換対象外。現行のまま残す |
 
 ## 2. 配置とパッケージ

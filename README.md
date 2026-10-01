@@ -1,6 +1,7 @@
 # うさぎ銀行 勘定系オンライン (Usagi Bank Core Banking)
 
-A deliberately *legacy* Japanese core-banking application — **Spring Boot 1.5.22 / Java 8 / JSP + jQuery / JUnit 4 / Oracle-flavoured SQL on H2 / a GnuCOBOL end-of-day batch / a Jenkinsfile** — built as a realistic target for migration & modernization demos.
+A deliberately *legacy* Japanese core-banking application — **Spring Boot 1.5.22 / Kotlin 1.9.25 on JDK 8 (jvmTarget 1.8) / JSP + jQuery / JUnit 4 / Oracle-flavoured SQL on H2 / a GnuCOBOL end-of-day batch / a Jenkinsfile** — built as a realistic target for migration & modernization demos.
+The application and test sources are Kotlin (`src/main/kotlin`, `src/test/kotlin`); conversion rules are in `docs/kotlin-migration.md`.
 
 Everything a mid-2010s bank system would have is here on purpose: `javax.*`, `WebSecurityConfigurerAdapter`, Spring Data `findOne()`, Hibernate `Criteria`, Joda-Time, Ehcache 2, JAXB, `BigDecimal.ROUND_DOWN`, MS932 fixed-width host files, Zengin account-type codes, and a 1998 COBOL program that must keep producing the same file to the sen (銭).
 
@@ -21,11 +22,13 @@ REST API (`/usagi/api/**`, HTTP Basic): `GET /api/accounts`, `GET /api/accounts/
 
 ## 起動 (Running locally)
 
-Requirements: JDK 8, Maven 3.x (GnuCOBOL `cobc` only for the COBOL batch).
+Requirements: JDK 8, Maven 3.x (GnuCOBOL `cobc` only for the COBOL batch). Kotlin needs no separate install — `kotlin-maven-plugin` 1.9.25 compiles it.
 
 ```bash
-JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 mvn spring-boot:run
+JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 mvn -B spring-boot:run
+# main class jp.usagi.bank.UsagiBankApplicationKt; ready when the log shows "Started UsagiBankApplicationKt"
 # → http://localhost:8080/usagi/
+JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 mvn -B package        # → target/usagi-bank.war
 ```
 
 Demo users (in-memory, `SecurityConfig`):
@@ -48,8 +51,19 @@ curl -u admin:admin123 -o ACCOUNTS.DAT http://localhost:8080/usagi/api/batch/acc
 ## テスト (Tests)
 
 ```bash
-JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 mvn test        # 39 tests (JUnit 4, SpringRunner, H2 Oracle mode)
-cd batch/cobol && ./run.sh                                     # compile & run UBEOD001, diff against expected/ACCRUED.DAT
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+mvn -B test                   # 39 tests (Kotlin, JUnit 4, SpringRunner, H2 Oracle mode)
+mvn -B test -Dtest='*Test'    # unit only: InterestServiceTest + CobolParityTest (6)
+mvn -B test -Dtest='*IT'      # Spring/H2 integration only (33)
+mvn -B verify                 # tests + ktlint check
+(cd batch/cobol && ./run.sh)  # compile & run UBEOD001, diff against expected/ACCRUED.DAT
+```
+
+Lint (ktlint 1.3.1 via `ktlint-maven-plugin` 3.3.0, bound to `verify`):
+
+```bash
+mvn -B ktlint:check           # report violations
+mvn -B ktlint:format          # auto-format src/main/kotlin and src/test/kotlin
 ```
 
 | Test | What it pins down |
@@ -60,16 +74,18 @@ cd batch/cobol && ./run.sh                                     # compile & run U
 | `StatementServiceIT` | JAXB 明細 XML |
 | `BankingApiIT` | 認証・ロール別認可・エラーコード (`UB-xxxx`)・日本語ラベル |
 | `WebSecurityIT` | 画面フォーム POST のサーバ側ロール制御 (監査ロールは照会のみ), CSRF |
-| `CobolParityTest` | Java の利息計算と COBOL `UBEOD001` の出力が 1 銭単位で一致すること |
+| `CobolParityTest` | Kotlin (`InterestService`) の利息計算と COBOL `UBEOD001` の出力が 1 銭単位で一致すること |
 
-Golden files are regenerated with `mvn test -Dgolden.argLine=-Dgolden.update=true` (see `BatchFileServiceIT`).
+Golden files are regenerated with `mvn -B test -Dgolden.argLine=-Dgolden.update=true` (see `BatchFileServiceIT`).
 
 ## リポジトリ構成
 
 ```
-pom.xml                          Spring Boot 1.5.22 parent, WAR packaging, Java 1.8
-Jenkinsfile                      Jenkins 2.x declarative pipeline (WebSphere staging deploy)
-src/main/java/jp/usagi/bank/
+pom.xml                          Spring Boot 1.5.22 parent, WAR packaging, Kotlin 1.9.25 (jvmTarget 1.8), ktlint
+Jenkinsfile                      Jenkins 2.x declarative pipeline (ktlint, tests, COBOL golden test, WebSphere staging deploy)
+docs/kotlin-migration.md         Kotlin conversion rules
+src/main/kotlin/jp/usagi/bank/
+  UsagiBankApplication.kt        SpringBootServletInitializer + top-level main (UsagiBankApplicationKt)
   config/                        SecurityConfig (2× WebSecurityConfigurerAdapter), WebMvcConfig, AuditLogFilter
   domain/                        JPA entities: Branch, Customer, Account, Transaction + enums (Zengin codes)
   repository/                    Spring Data JPA + Hibernate Criteria (AccountRepositoryImpl) + Oracle ROWNUM native SQL
@@ -80,6 +96,7 @@ src/main/java/jp/usagi/bank/
   xml/                           JAXB statement model
 src/main/resources/db/migration  Flyway 4: V1 schema (Oracle DDL dialect), V2 seed data (5 支店, 10 顧客, 15 口座)
 src/main/webapp/WEB-INF/jsp      JSP/JSTL pages (Japanese UI) + jQuery 1.12.4
+src/test/kotlin/jp/usagi/bank/   JUnit 4 tests (*Test = unit, *IT = Spring/H2 integration)
 batch/cobol/UBEOD001.cbl         COBOL 日次利息積数バッチ (GnuCOBOL), data/, expected/, run.sh
 ```
 
@@ -87,23 +104,23 @@ batch/cobol/UBEOD001.cbl         COBOL 日次利息積数バッチ (GnuCOBOL), d
 
 The codebase is seeded with hotspots for each track. All of them can be validated by the existing test suite — the tests are the parity contract.
 
-### 1. Spring Boot 1.5 / Java 8 → Spring Boot 3 / Java 21 (primary)
+### 1. Spring Boot 1.5 / JDK 8 → Spring Boot 3 / JDK 21 (primary)
 
 | Hotspot | Where |
 |---|---|
 | `javax.persistence`, `javax.validation`, `javax.servlet`, `javax.xml.bind` → `jakarta.*` / JAXB removed from JDK | every entity, filters, `xml/` |
-| `WebSecurityConfigurerAdapter`, `antMatchers`, `NoOpPasswordEncoder`-style plaintext in-memory users, `security.*` properties | `config/SecurityConfig.java`, `application.properties` |
+| `WebSecurityConfigurerAdapter`, `antMatchers`, `NoOpPasswordEncoder`-style plaintext in-memory users, `security.*` properties | `config/SecurityConfig.kt`, `application.properties` |
 | Spring Data `findOne(id)`, `new PageRequest(...)` | `service/*`, `repository/*` |
-| Hibernate 5.0 `Criteria` / `Restrictions` / `Order` (removed in Hibernate 6) | `repository/AccountRepositoryImpl.java` |
-| `org.hibernate.validator.constraints.NotBlank` → `jakarta.validation.constraints.NotBlank` | `domain/Customer.java` |
+| Hibernate 5.0 `Criteria` / `Restrictions` / `Order` (removed in Hibernate 6) | `repository/AccountRepositoryImpl.kt` |
+| `org.hibernate.validator.constraints.NotBlank` → `jakarta.validation.constraints.NotBlank` | `domain/Customer.kt` |
 | Flyway 4 (`flyway.*` → `spring.flyway.*`, `baseline-on-migrate`), H2 1.4 → 2.x, Ehcache 2 → JCache/Caffeine | `pom.xml`, `application.properties`, `ehcache.xml` |
 | `server.context-path`, `spring.http.encoding.*`, `endpoints.*`/`management.security.enabled` → new Actuator model | `application.properties` |
-| `SpringBootServletInitializer` WAR + JSP (JSP still works in Boot 3 with Tomcat but only as WAR) | `UsagiBankApplication.java`, `pom.xml` |
-| JUnit 4 (`@RunWith(SpringRunner)`, `@Test(expected=...)`, Hamcrest 1.3) → JUnit 5 | `src/test` |
+| `SpringBootServletInitializer` WAR + JSP (JSP still works in Boot 3 with Tomcat but only as WAR) | `UsagiBankApplication.kt`, `pom.xml` |
+| JUnit 4 (`@RunWith(SpringRunner)`, `@Test(expected=...)`, Hamcrest 1.3) → JUnit 5 | `src/test/kotlin` |
 | Joda-Time → `java.time`, `BigDecimal.ROUND_DOWN` → `RoundingMode`, `new BigDecimal("...")` idioms | `service/*`, `BusinessDateService` |
-| `Charset.forName("MS932")`, `IOUtils`, Java 8 stream-less loops → records, `var`, text blocks, `switch` expressions | `service/BatchFileService.java` |
+| `Charset.forName("MS932")`, `IOUtils`, index-based loops → idiomatic Kotlin (`use`, collection operations, `when`) | `service/BatchFileService.kt` |
 
-### 2. COBOL batch → Java service
+### 2. COBOL batch → Kotlin service
 `batch/cobol/UBEOD001.cbl` is the host-side twin of `InterestService` + `BatchFileService.importAccrued`. `CobolParityTest` and `expected/ACCRUED.DAT` define the contract for replacing the COBOL step with `POST /api/batch/eod`.
 
 ### 3. JSP/jQuery → React/TypeScript
@@ -113,7 +130,7 @@ Ten JSP pages behind `web/*Controller` with the REST API already exposing the sa
 `V1__create_schema.sql` uses `VARCHAR2`, `NUMBER(p,s)`, `SYSDATE`, sequences; repositories use `NVL`, `ROWNUM`, `FROM DUAL`; `application.properties` documents the production Oracle URL. H2 runs in `MODE=Oracle`.
 
 ### 5. Jenkins → GitHub Actions
-`Jenkinsfile` (declarative, WebSphere `wsadmin` deploy, Nexus, SonarQube 5.6) → workflows with Maven/Temurin matrix + GnuCOBOL step.
+`Jenkinsfile` (declarative, WebSphere `wsadmin` deploy, Nexus, SonarQube 5.6) → workflows with Maven/Temurin 8 + ktlint + GnuCOBOL step.
 
 ## 注意
 This is a demo system with fictitious data. Credentials are in-memory demo values only.

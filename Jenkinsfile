@@ -34,8 +34,16 @@ pipeline {
             }
         }
 
+        stage('Lint (ktlint)') {
+            // ktlint 1.3.1 (ktlint-maven-plugin 3.3.0)。違反は `mvn -B ktlint:format` で整形
+            steps {
+                sh 'mvn -B -s /opt/jenkins/settings.xml ktlint:check'
+            }
+        }
+
         stage('Unit Test') {
             steps {
+                // InterestServiceTest, CobolParityTest (6 件)
                 sh 'mvn -B -s /opt/jenkins/settings.xml test -Dtest=*Test'
             }
             post {
@@ -47,6 +55,7 @@ pipeline {
 
         stage('Integration Test') {
             steps {
+                // *IT (Spring/H2 結合テスト, 33 件)
                 sh 'mvn -B -s /opt/jenkins/settings.xml test -Dtest=*IT'
             }
         }

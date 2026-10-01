@@ -1,13 +1,13 @@
-package jp.usagi.bank.config;
+package jp.usagi.bank.config
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Configuration
+import org.springframework.core.annotation.Order
+import org.springframework.http.HttpMethod
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 
 /**
  * 認証・認可設定.
@@ -17,14 +17,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
  */
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+class SecurityConfig {
 
     @Configuration
     @Order(1)
-    public static class ApiSecurityConfig extends WebSecurityConfigurerAdapter {
+    class ApiSecurityConfig : WebSecurityConfigurerAdapter() {
 
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
+        override fun configure(http: HttpSecurity) {
             http.antMatcher("/api/**")
                 .csrf().disable()
                 .authorizeRequests()
@@ -33,16 +32,15 @@ public class SecurityConfig {
                     .antMatchers(HttpMethod.POST, "/api/transfers").hasAnyRole("TELLER", "ADMIN")
                     .anyRequest().authenticated()
                 .and()
-                .httpBasic();
+                .httpBasic()
         }
     }
 
     @Configuration
     @Order(2)
-    public static class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    class WebSecurityConfig : WebSecurityConfigurerAdapter() {
 
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
+        override fun configure(http: HttpSecurity) {
             http.authorizeRequests()
                     .antMatchers("/static/**", "/webjars/**", "/login", "/health").permitAll()
                     .antMatchers("/admin/**").hasRole("ADMIN")
@@ -62,18 +60,18 @@ public class SecurityConfig {
                     .logoutSuccessUrl("/login?logout")
                     .permitAll()
                 .and()
-                .headers().frameOptions().sameOrigin();
+                .headers().frameOptions().sameOrigin()
         }
     }
 
     @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+    fun configureGlobal(auth: AuthenticationManagerBuilder) {
         // TODO: 本番は行内LDAPへ切替 (2015年度課題)
         auth.inMemoryAuthentication()
             .withUser("teller").password("teller123").roles("TELLER")
             .and()
             .withUser("admin").password("admin123").roles("ADMIN", "TELLER")
             .and()
-            .withUser("auditor").password("audit123").roles("AUDITOR");
+            .withUser("auditor").password("audit123").roles("AUDITOR")
     }
 }

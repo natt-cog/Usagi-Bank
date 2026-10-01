@@ -64,6 +64,17 @@ cd batch/cobol && ./run.sh                                     # compile & run U
 
 Golden files are regenerated with `mvn test -Dgolden.argLine=-Dgolden.update=true` (see `BatchFileServiceIT`).
 
+## Linting (ktlint)
+
+Kotlin sources are checked with [ktlint](https://pinterest.github.io/ktlint/) via `ktlint-maven-plugin`; the style lives in `.editorconfig` (`intellij_idea` code style, 4-space indent, no line-length limit).
+
+```bash
+JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 mvn ktlint:format   # auto-format src/main/kotlin + src/test/kotlin locally
+JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 mvn -B verify       # runs the tests and then ktlint:check (fails on any violation)
+```
+
+`mvn -B package` does not run the check; it is bound to the `verify` phase.
+
 ## リポジトリ構成
 
 ```

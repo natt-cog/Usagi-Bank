@@ -1,10 +1,12 @@
 package jp.usagi.bank.api.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import jp.usagi.bank.domain.Transaction
 import java.math.BigDecimal
 import java.util.Date
 
+@JsonPropertyOrder("id", "type", "typeLabel", "credit", "amount", "balanceAfter", "description", "referenceNo", "valueDate", "postedAt")
 data class TransactionDto(
     val id: Long?,
     val type: String?,

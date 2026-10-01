@@ -1,14 +1,14 @@
 package jp.usagi.bank.service
 
+import jp.usagi.bank.domain.Customer
+import jp.usagi.bank.domain.KycStatus
+import jp.usagi.bank.repository.CustomerRepository
 import org.apache.commons.lang3.StringUtils
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import jp.usagi.bank.domain.Customer
-import jp.usagi.bank.domain.KycStatus
-import jp.usagi.bank.repository.CustomerRepository
 
 @Service
 @Transactional(readOnly = true)

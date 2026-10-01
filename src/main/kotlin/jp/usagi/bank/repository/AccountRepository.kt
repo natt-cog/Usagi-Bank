@@ -1,17 +1,14 @@
 package jp.usagi.bank.repository
 
-import java.math.BigDecimal
-
-import javax.persistence.LockModeType
-
+import jp.usagi.bank.domain.Account
+import jp.usagi.bank.domain.AccountStatus
+import jp.usagi.bank.domain.AccountType
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
-
-import jp.usagi.bank.domain.Account
-import jp.usagi.bank.domain.AccountStatus
-import jp.usagi.bank.domain.AccountType
+import java.math.BigDecimal
+import javax.persistence.LockModeType
 
 interface AccountRepository : JpaRepository<Account, Long>, AccountRepositoryCustom {
 
@@ -27,8 +24,10 @@ interface AccountRepository : JpaRepository<Account, Long>, AccountRepositoryCus
 
     fun findByAccountTypeAndStatus(type: AccountType, status: AccountStatus): List<Account>
 
-    @Query(value = "SELECT NVL(SUM(BALANCE), 0) FROM ACCOUNT WHERE BRANCH_CODE = :branchCode AND STATUS = 'ACTIVE'",
-            nativeQuery = true)
+    @Query(
+        value = "SELECT NVL(SUM(BALANCE), 0) FROM ACCOUNT WHERE BRANCH_CODE = :branchCode AND STATUS = 'ACTIVE'",
+        nativeQuery = true,
+    )
     fun sumBalanceByBranch(@Param("branchCode") branchCode: String): BigDecimal
 
     @Query(value = "SELECT NVL(MAX(ACCOUNT_NO), '0000000') FROM ACCOUNT WHERE BRANCH_CODE = :branchCode", nativeQuery = true)

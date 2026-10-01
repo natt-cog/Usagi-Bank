@@ -4,5 +4,5 @@ package jp.usagi.bank.domain
 enum class KycStatus(val label: String) {
     PENDING("未確認"),
     VERIFIED("確認済"),
-    REJECTED("否認")
+    REJECTED("否認"),
 }

@@ -1,12 +1,11 @@
 package jp.usagi.bank.batch
 
+import jp.usagi.bank.service.BusinessDateService
+import jp.usagi.bank.service.InterestService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-
-import jp.usagi.bank.service.BusinessDateService
-import jp.usagi.bank.service.InterestService
 
 /**
  * 日締めバッチ (オンライン閉局後 23:30 JST).
@@ -17,7 +16,7 @@ import jp.usagi.bank.service.InterestService
 class EndOfDayJob(
     private val interestService: InterestService,
     private val businessDateService: BusinessDateService,
-    @Value("\${usagi.batch.eod.enabled:true}") private val enabled: Boolean
+    @Value("\${usagi.batch.eod.enabled:true}") private val enabled: Boolean,
 ) {
 
     @Scheduled(cron = "\${usagi.batch.eod.cron:0 30 23 * * *}", zone = "Asia/Tokyo")

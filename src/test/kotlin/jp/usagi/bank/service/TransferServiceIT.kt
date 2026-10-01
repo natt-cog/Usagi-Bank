@@ -1,14 +1,16 @@
 package jp.usagi.bank.service
 
+import jp.usagi.bank.domain.Account
+import jp.usagi.bank.domain.AccountStatus
+import jp.usagi.bank.domain.TransactionType
+import jp.usagi.bank.repository.TransactionRepository
+import jp.usagi.bank.service.TransferService.TransferResult
+import org.joda.time.LocalDate
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.fail
-
-import java.math.BigDecimal
-
-import org.joda.time.LocalDate
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,12 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.transaction.annotation.Transactional
-
-import jp.usagi.bank.domain.Account
-import jp.usagi.bank.domain.AccountStatus
-import jp.usagi.bank.domain.TransactionType
-import jp.usagi.bank.repository.TransactionRepository
-import jp.usagi.bank.service.TransferService.TransferResult
+import java.math.BigDecimal
 
 /** 振込業務ロジックの結合テスト (H2 Oracle モード). */
 @RunWith(SpringRunner::class)
@@ -33,10 +30,13 @@ class TransferServiceIT {
 
     @Autowired
     lateinit var transferService: TransferService
+
     @Autowired
     lateinit var accountService: AccountService
+
     @Autowired
     lateinit var transactionRepository: TransactionRepository
+
     @Autowired
     lateinit var businessDateService: BusinessDateService
 
@@ -70,8 +70,15 @@ class TransferServiceIT {
         val fromBefore = accountService.getAccount("001", "1000001").balance
         val toBefore = accountService.getAccount("002", "2000001").balance
 
-        val r: TransferResult = transferService.transfer("001", "1000001", "002", "2000001",
-                BigDecimal("100000"), "家賃", "teller")
+        val r: TransferResult = transferService.transfer(
+            "001",
+            "1000001",
+            "002",
+            "2000001",
+            BigDecimal("100000"),
+            "家賃",
+            "teller",
+        )
 
         assertNotNull(r.referenceNo)
         assertEquals(TransactionType.TRANSFER_OUT, r.debit.type)
@@ -89,8 +96,15 @@ class TransferServiceIT {
 
     @Test
     fun sameBranchTransferHasNoFeeTransaction() {
-        val r: TransferResult = transferService.transfer("001", "1000001", "001", "1000003",
-                BigDecimal("1000"), null, "teller")
+        val r: TransferResult = transferService.transfer(
+            "001",
+            "1000001",
+            "001",
+            "1000003",
+            BigDecimal("1000"),
+            null,
+            "teller",
+        )
         assertNull(r.fee)
         assertEquals(BigDecimal.ZERO, r.feeAmount)
     }

@@ -1,18 +1,15 @@
 package jp.usagi.bank.service
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
-
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.IOException
-import java.io.InputStream
-import java.math.BigDecimal
-
+import jp.usagi.bank.domain.Account
+import jp.usagi.bank.domain.AccountStatus
+import jp.usagi.bank.domain.AccountType
+import jp.usagi.bank.service.BatchFileService.ImportResult
 import org.apache.commons.io.IOUtils
 import org.joda.time.LocalDate
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,11 +18,11 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.transaction.annotation.Transactional
-
-import jp.usagi.bank.domain.Account
-import jp.usagi.bank.domain.AccountStatus
-import jp.usagi.bank.domain.AccountType
-import jp.usagi.bank.service.BatchFileService.ImportResult
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.math.BigDecimal
 
 /**
  * ホスト連携ファイル (固定長 52 桁, MS932) のゴールデンファイルテスト.
@@ -39,8 +36,10 @@ class BatchFileServiceIT {
 
     @Autowired
     lateinit var batchFileService: BatchFileService
+
     @Autowired
     lateinit var accountService: AccountService
+
     @Autowired
     lateinit var businessDateService: BusinessDateService
 
@@ -61,8 +60,10 @@ class BatchFileServiceIT {
         val actual = String(out.toByteArray(), BatchFileService.HOST_CHARSET)
         val expected = golden("ACCOUNTS.DAT")
         if (expected != actual && System.getProperty("golden.update") != null) {
-            java.nio.file.Files.write(java.nio.file.Paths.get("src/test/resources/golden/ACCOUNTS.DAT"),
-                    out.toByteArray())
+            java.nio.file.Files.write(
+                java.nio.file.Paths.get("src/test/resources/golden/ACCOUNTS.DAT"),
+                out.toByteArray(),
+            )
             fail("golden file updated; re-run")
         }
         assertEquals(expected, actual)
@@ -92,8 +93,10 @@ class BatchFileServiceIT {
         a.interestRate = BigDecimal("0.0010")
         a.accruedInterest = BigDecimal("12.34")
         //            D 店番 口座番号 科目 状態 残高(15)          利率(7) 未払利息(17)
-        assertEquals("D" + "001" + "1000001" + "1" + "A" + "000000001250000" + "0000010" + "00000000000001234",
-                BatchFileService.formatRecord(a))
+        assertEquals(
+            "D" + "001" + "1000001" + "1" + "A" + "000000001250000" + "0000010" + "00000000000001234",
+            BatchFileService.formatRecord(a),
+        )
     }
 
     @Test

@@ -1,10 +1,8 @@
 package jp.usagi.bank.api.dto
 
-import java.util.Date
-
 import com.fasterxml.jackson.annotation.JsonFormat
-
 import jp.usagi.bank.domain.Customer
+import java.util.Date
 
 data class CustomerDto(
     val id: Long?,
@@ -16,7 +14,7 @@ data class CustomerDto(
     val postalCode: String?,
     val address: String?,
     val phone: String?,
-    val kycStatus: String
+    val kycStatus: String,
 ) {
 
     companion object {
@@ -30,7 +28,7 @@ data class CustomerDto(
             postalCode = c.postalCode,
             address = c.address,
             phone = c.phone,
-            kycStatus = c.kycStatus.name
+            kycStatus = c.kycStatus.name,
         )
     }
 }

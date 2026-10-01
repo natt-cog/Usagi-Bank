@@ -1,8 +1,13 @@
 package jp.usagi.bank.web
 
-import java.math.BigDecimal
-import java.security.Principal
-
+import jp.usagi.bank.domain.Account
+import jp.usagi.bank.domain.AccountStatus
+import jp.usagi.bank.domain.AccountType
+import jp.usagi.bank.domain.Transaction
+import jp.usagi.bank.service.AccountService
+import jp.usagi.bank.service.BankingException
+import jp.usagi.bank.service.BusinessDateService
+import jp.usagi.bank.service.StatementService
 import org.joda.time.LocalDate
 import org.springframework.data.domain.Page
 import org.springframework.http.MediaType
@@ -15,22 +20,15 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
-
-import jp.usagi.bank.domain.Account
-import jp.usagi.bank.domain.AccountStatus
-import jp.usagi.bank.domain.AccountType
-import jp.usagi.bank.domain.Transaction
-import jp.usagi.bank.service.AccountService
-import jp.usagi.bank.service.BankingException
-import jp.usagi.bank.service.BusinessDateService
-import jp.usagi.bank.service.StatementService
+import java.math.BigDecimal
+import java.security.Principal
 
 @Controller
 @RequestMapping("/accounts")
 class AccountController(
     private val accountService: AccountService,
     private val statementService: StatementService,
-    private val businessDateService: BusinessDateService
+    private val businessDateService: BusinessDateService,
 ) {
 
     @GetMapping
@@ -39,7 +37,8 @@ class AccountController(
         @RequestParam(required = false) type: AccountType?,
         @RequestParam(required = false) status: AccountStatus?,
         @RequestParam(required = false) minBalance: BigDecimal?,
-        @RequestParam(required = false) maxBalance: BigDecimal?, model: Model
+        @RequestParam(required = false) maxBalance: BigDecimal?,
+        model: Model,
     ): String {
         model.addAttribute("accounts", accountService.search(branchCode, type, status, minBalance, maxBalance))
         model.addAttribute("types", AccountType.values())
@@ -49,8 +48,10 @@ class AccountController(
 
     @GetMapping("/{branchCode}/{accountNo}")
     fun detail(
-        @PathVariable branchCode: String, @PathVariable accountNo: String,
-        @RequestParam(defaultValue = "0") page: Int, model: Model
+        @PathVariable branchCode: String,
+        @PathVariable accountNo: String,
+        @RequestParam(defaultValue = "0") page: Int,
+        model: Model,
     ): String {
         val account = accountService.getAccount(branchCode, accountNo)
         val txns: Page<Transaction> = accountService.listTransactions(account, page, 20)
@@ -62,9 +63,12 @@ class AccountController(
 
     @PostMapping("/{branchCode}/{accountNo}/deposit")
     fun deposit(
-        @PathVariable branchCode: String, @PathVariable accountNo: String,
-        @RequestParam amount: BigDecimal, @RequestParam(required = false) description: String?,
-        principal: Principal, ra: RedirectAttributes
+        @PathVariable branchCode: String,
+        @PathVariable accountNo: String,
+        @RequestParam amount: BigDecimal,
+        @RequestParam(required = false) description: String?,
+        principal: Principal,
+        ra: RedirectAttributes,
     ): String {
         try {
             val account: Account = accountService.getAccount(branchCode, accountNo)
@@ -78,9 +82,12 @@ class AccountController(
 
     @PostMapping("/{branchCode}/{accountNo}/withdraw")
     fun withdraw(
-        @PathVariable branchCode: String, @PathVariable accountNo: String,
-        @RequestParam amount: BigDecimal, @RequestParam(required = false) description: String?,
-        principal: Principal, ra: RedirectAttributes
+        @PathVariable branchCode: String,
+        @PathVariable accountNo: String,
+        @RequestParam amount: BigDecimal,
+        @RequestParam(required = false) description: String?,
+        principal: Principal,
+        ra: RedirectAttributes,
     ): String {
         try {
             val account: Account = accountService.getAccount(branchCode, accountNo)
@@ -94,8 +101,10 @@ class AccountController(
 
     @PostMapping("/{branchCode}/{accountNo}/status")
     fun changeStatus(
-        @PathVariable branchCode: String, @PathVariable accountNo: String,
-        @RequestParam status: AccountStatus, ra: RedirectAttributes
+        @PathVariable branchCode: String,
+        @PathVariable accountNo: String,
+        @RequestParam status: AccountStatus,
+        ra: RedirectAttributes,
     ): String {
         try {
             accountService.changeStatus(accountService.getAccount(branchCode, accountNo), status)
@@ -109,8 +118,10 @@ class AccountController(
     @GetMapping(value = ["/{branchCode}/{accountNo}/statement.xml"], produces = [MediaType.APPLICATION_XML_VALUE])
     @ResponseBody
     fun statement(
-        @PathVariable branchCode: String, @PathVariable accountNo: String,
-        @RequestParam(required = false) from: String?, @RequestParam(required = false) to: String?
+        @PathVariable branchCode: String,
+        @PathVariable accountNo: String,
+        @RequestParam(required = false) from: String?,
+        @RequestParam(required = false) to: String?,
     ): String {
         val account = accountService.getAccount(branchCode, accountNo)
         val toDate: LocalDate = if (to == null) businessDateService.today() else LocalDate.parse(to)

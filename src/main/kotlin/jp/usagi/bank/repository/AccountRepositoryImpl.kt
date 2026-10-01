@@ -1,18 +1,15 @@
 package jp.usagi.bank.repository
 
-import java.math.BigDecimal
-
-import javax.persistence.EntityManager
-import javax.persistence.PersistenceContext
-
+import jp.usagi.bank.domain.Account
+import jp.usagi.bank.domain.AccountStatus
+import jp.usagi.bank.domain.AccountType
 import org.hibernate.Criteria
 import org.hibernate.Session
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Restrictions
-
-import jp.usagi.bank.domain.Account
-import jp.usagi.bank.domain.AccountStatus
-import jp.usagi.bank.domain.AccountType
+import java.math.BigDecimal
+import javax.persistence.EntityManager
+import javax.persistence.PersistenceContext
 
 /**
  * Hibernate Criteria API による動的検索.
@@ -24,8 +21,14 @@ class AccountRepositoryImpl : AccountRepositoryCustom {
     lateinit var entityManager: EntityManager
 
     @Suppress("UNCHECKED_CAST")
-    override fun search(branchCode: String?, type: AccountType?, status: AccountStatus?,
-            minBalance: BigDecimal?, maxBalance: BigDecimal?, maxResults: Int): List<Account> {
+    override fun search(
+        branchCode: String?,
+        type: AccountType?,
+        status: AccountStatus?,
+        minBalance: BigDecimal?,
+        maxBalance: BigDecimal?,
+        maxResults: Int,
+    ): List<Account> {
         val session: Session = entityManager.unwrap(Session::class.java)
         val criteria: Criteria = session.createCriteria(Account::class.java)
         if (branchCode != null && !branchCode.isEmpty()) {

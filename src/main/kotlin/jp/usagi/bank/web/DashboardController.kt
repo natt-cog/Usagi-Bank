@@ -1,25 +1,23 @@
 package jp.usagi.bank.web
 
-import java.math.BigDecimal
-import java.util.LinkedHashMap
-
-import org.springframework.stereotype.Controller
-import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.GetMapping
-
 import jp.usagi.bank.domain.Account
 import jp.usagi.bank.domain.Branch
 import jp.usagi.bank.repository.BranchRepository
 import jp.usagi.bank.service.AccountService
 import jp.usagi.bank.service.BusinessDateService
 import jp.usagi.bank.service.CustomerService
+import org.springframework.stereotype.Controller
+import org.springframework.ui.Model
+import org.springframework.web.bind.annotation.GetMapping
+import java.math.BigDecimal
+import java.util.LinkedHashMap
 
 @Controller
 class DashboardController(
     private val accountService: AccountService,
     private val customerService: CustomerService,
     private val branchRepository: BranchRepository,
-    private val businessDateService: BusinessDateService
+    private val businessDateService: BusinessDateService,
 ) {
 
     @GetMapping("/dashboard")

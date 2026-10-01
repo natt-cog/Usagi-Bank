@@ -19,7 +19,6 @@ class CustomerApiController(
     private val customerService: CustomerService,
     private val accountService: AccountService,
 ) {
-
     @GetMapping
     fun search(
         @RequestParam("q", required = false) q: String?,
@@ -34,12 +33,14 @@ class CustomerApiController(
     }
 
     @GetMapping("/{cifNo}")
-    fun get(@PathVariable("cifNo") cifNo: String): CustomerDto {
-        return CustomerDto.from(customerService.getByCifNo(cifNo))
-    }
+    fun get(
+        @PathVariable("cifNo") cifNo: String,
+    ): CustomerDto = CustomerDto.from(customerService.getByCifNo(cifNo))
 
     @GetMapping("/{cifNo}/accounts")
-    fun accounts(@PathVariable("cifNo") cifNo: String): List<AccountDto> {
+    fun accounts(
+        @PathVariable("cifNo") cifNo: String,
+    ): List<AccountDto> {
         val c: Customer = customerService.getByCifNo(cifNo)
         val result = ArrayList<AccountDto>()
         for (a: Account in accountService.listAccountsOf(c.id)) {

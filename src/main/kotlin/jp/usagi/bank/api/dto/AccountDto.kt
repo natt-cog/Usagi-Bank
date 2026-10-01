@@ -21,18 +21,19 @@ data class AccountDto(
 ) {
     companion object {
         @JvmStatic
-        fun from(a: Account): AccountDto = AccountDto(
-            id = a.id,
-            branchCode = a.branchCode,
-            accountNo = a.accountNo,
-            accountType = a.accountType?.name,
-            accountTypeLabel = a.accountType?.label,
-            status = a.status.name,
-            customerCifNo = a.customer?.cifNo,
-            customerName = a.customer?.nameKanji,
-            balance = a.balance,
-            interestRate = a.interestRate,
-            openedOn = a.openedOn,
-        )
+        fun from(a: Account): AccountDto =
+            AccountDto(
+                id = a.id,
+                branchCode = a.branchCode,
+                accountNo = a.accountNo,
+                accountType = a.accountType?.name,
+                accountTypeLabel = a.accountType?.label,
+                status = a.status.name,
+                customerCifNo = a.customer?.cifNo,
+                customerName = a.customer?.nameKanji,
+                balance = a.balance,
+                interestRate = a.interestRate,
+                openedOn = a.openedOn,
+            )
     }
 }

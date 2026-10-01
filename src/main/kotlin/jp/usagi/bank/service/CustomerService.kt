@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional
 class CustomerService(
     private val customerRepository: CustomerRepository,
 ) {
-
     fun getByCifNo(cifNo: String?): Customer =
         customerRepository.findByCifNo(cifNo) ?: throw CustomerNotFoundException(cifNo)
 
@@ -24,7 +23,11 @@ class CustomerService(
         return customer ?: throw CustomerNotFoundException(id.toString())
     }
 
-    fun search(keyword: String?, page: Int, size: Int): Page<Customer> {
+    fun search(
+        keyword: String?,
+        page: Int,
+        size: Int,
+    ): Page<Customer> {
         val pageable = PageRequest(page, size, Sort(Sort.Direction.ASC, "nameKana"))
         if (keyword == null || keyword.trim { it <= ' ' }.isEmpty()) {
             return customerRepository.findAll(pageable)
@@ -52,7 +55,10 @@ class CustomerService(
     }
 
     @Transactional
-    fun updateKyc(id: Long?, status: KycStatus) {
+    fun updateKyc(
+        id: Long?,
+        status: KycStatus,
+    ) {
         val customer = getById(id)
         customer.kycStatus = status
         customerRepository.save(customer)

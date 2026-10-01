@@ -38,7 +38,10 @@ class EndOfDayJob(
         return EodResult(accrued, posted)
     }
 
-    class EodResult(val accruedAccounts: Int, val postedAccounts: Int)
+    class EodResult(
+        val accruedAccounts: Int,
+        val postedAccounts: Int,
+    )
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(EndOfDayJob::class.java)

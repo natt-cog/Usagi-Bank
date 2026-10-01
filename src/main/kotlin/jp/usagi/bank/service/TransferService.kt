@@ -1,7 +1,5 @@
 package jp.usagi.bank.service
 
-import java.math.BigDecimal
-import java.util.concurrent.atomic.AtomicLong
 import jp.usagi.bank.domain.Account
 import jp.usagi.bank.domain.Transaction
 import jp.usagi.bank.domain.TransactionType
@@ -14,6 +12,8 @@ import org.springframework.cache.annotation.CacheEvict
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * 行内振込.
@@ -31,10 +31,13 @@ class TransferService(
     private val businessDateService: BusinessDateService,
     @Value("\${usagi.transfer.daily-limit:1000000}") val dailyLimit: BigDecimal,
 ) {
-
     private val sequence = AtomicLong(1)
 
-    fun calculateFee(from: Account, to: Account, amount: BigDecimal): BigDecimal {
+    fun calculateFee(
+        from: Account,
+        to: Account,
+        amount: BigDecimal,
+    ): BigDecimal {
         if (from.branchCode == to.branchCode) {
             return BigDecimal.ZERO
         }
@@ -91,33 +94,38 @@ class TransferService(
         val payerName: String? = checkNotNull(from.customer).nameKana
 
         from.balance = from.balance.subtract(amt)
-        val debit = accountService.post(
-            from,
-            TransactionType.TRANSFER_OUT,
-            amt,
-            "振込 $payeeName" + (if (description == null) "" else " $description"),
-            ref,
-            operatorId,
-        )
+        val debit =
+            accountService.post(
+                from,
+                TransactionType.TRANSFER_OUT,
+                amt,
+                "振込 $payeeName" + (if (description == null) "" else " $description"),
+                ref,
+                operatorId,
+            )
         var feeTxn: Transaction? = null
         if (fee.signum() > 0) {
             from.balance = from.balance.subtract(fee)
             feeTxn = accountService.post(from, TransactionType.TRANSFER_FEE, fee, "振込手数料", ref, operatorId)
         }
         to.balance = to.balance.add(amt)
-        val credit = accountService.post(
-            to,
-            TransactionType.TRANSFER_IN,
-            amt,
-            "振込 $payerName" + (if (description == null) "" else " $description"),
-            ref,
-            operatorId,
-        )
+        val credit =
+            accountService.post(
+                to,
+                TransactionType.TRANSFER_IN,
+                amt,
+                "振込 $payerName" + (if (description == null) "" else " $description"),
+                ref,
+                operatorId,
+            )
 
         return TransferResult(ref, debit, feeTxn, credit)
     }
 
-    private fun lock(branchCode: String?, accountNo: String?): Account {
+    private fun lock(
+        branchCode: String?,
+        accountNo: String?,
+    ): Account {
         val account: Account? = accountRepository.findForUpdate(branchCode, accountNo)
         return account ?: throw AccountNotFoundException(branchCode, accountNo)
     }

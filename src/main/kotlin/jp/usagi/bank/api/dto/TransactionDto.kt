@@ -27,17 +27,18 @@ data class TransactionDto(
 ) {
     companion object {
         @JvmStatic
-        fun from(t: Transaction): TransactionDto = TransactionDto(
-            id = t.id,
-            type = t.type?.name,
-            typeLabel = t.type?.label,
-            isCredit = t.type?.isCredit ?: false,
-            amount = t.amount,
-            balanceAfter = t.balanceAfter,
-            description = t.description,
-            referenceNo = t.referenceNo,
-            valueDate = t.valueDate,
-            postedAt = t.postedAt,
-        )
+        fun from(t: Transaction): TransactionDto =
+            TransactionDto(
+                id = t.id,
+                type = t.type?.name,
+                typeLabel = t.type?.label,
+                isCredit = t.type?.isCredit ?: false,
+                amount = t.amount,
+                balanceAfter = t.balanceAfter,
+                description = t.description,
+                referenceNo = t.referenceNo,
+                valueDate = t.valueDate,
+                postedAt = t.postedAt,
+            )
     }
 }

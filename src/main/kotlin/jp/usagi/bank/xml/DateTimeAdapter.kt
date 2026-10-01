@@ -5,7 +5,6 @@ import java.util.Date
 import javax.xml.bind.annotation.adapters.XmlAdapter
 
 class DateTimeAdapter : XmlAdapter<String, Date>() {
-
     @Throws(Exception::class)
     override fun unmarshal(v: String?): Date? = if (v == null) null else SimpleDateFormat(PATTERN).parse(v)
 

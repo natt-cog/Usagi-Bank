@@ -18,11 +18,13 @@ import javax.validation.Valid
 class TransferApiController(
     private val transferService: TransferService,
 ) {
-
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.CREATED)
-    fun transfer(@Valid @RequestBody req: TransferRequest, principal: Principal): TransferResponse {
-        return TransferResponse.from(
+    fun transfer(
+        @Valid @RequestBody req: TransferRequest,
+        principal: Principal,
+    ): TransferResponse =
+        TransferResponse.from(
             transferService.transfer(
                 req.fromBranchCode,
                 req.fromAccountNo,
@@ -33,5 +35,4 @@ class TransferApiController(
                 principal.name,
             ),
         )
-    }
 }

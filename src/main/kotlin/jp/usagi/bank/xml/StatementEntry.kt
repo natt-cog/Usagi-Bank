@@ -11,7 +11,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter
 @XmlType(name = "entry", namespace = Statement.NS)
 @XmlAccessorType(XmlAccessType.FIELD)
 class StatementEntry {
-
     @field:XmlElement(namespace = Statement.NS)
     @field:XmlJavaTypeAdapter(DateAdapter::class)
     var valueDate: Date? = null

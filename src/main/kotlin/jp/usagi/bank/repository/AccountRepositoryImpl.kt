@@ -1,8 +1,5 @@
 package jp.usagi.bank.repository
 
-import java.math.BigDecimal
-import javax.persistence.EntityManager
-import javax.persistence.PersistenceContext
 import jp.usagi.bank.domain.Account
 import jp.usagi.bank.domain.AccountStatus
 import jp.usagi.bank.domain.AccountType
@@ -10,13 +7,15 @@ import org.hibernate.Criteria
 import org.hibernate.Session
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Restrictions
+import java.math.BigDecimal
+import javax.persistence.EntityManager
+import javax.persistence.PersistenceContext
 
 /**
  * Hibernate Criteria API による動的検索.
  * (JPA Criteria は冗長なため旧来の Hibernate Criteria を使用)
  */
 class AccountRepositoryImpl : AccountRepositoryCustom {
-
     @PersistenceContext
     private lateinit var entityManager: EntityManager
 

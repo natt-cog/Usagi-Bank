@@ -21,7 +21,6 @@ import javax.persistence.TemporalType
 @Entity
 @Table(name = "TRANSACTION")
 class Transaction {
-
     @field:Id
     @field:GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "transaction_seq")
     @field:SequenceGenerator(name = "transaction_seq", sequenceName = "SEQ_TRANSACTION", allocationSize = 1)

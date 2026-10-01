@@ -1,6 +1,5 @@
 package jp.usagi.bank.service
 
-import java.math.BigDecimal
 import jp.usagi.bank.domain.AccountStatus
 import jp.usagi.bank.domain.TransactionType
 import jp.usagi.bank.repository.TransactionRepository
@@ -18,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 
 /** 振込業務ロジックの結合テスト (H2 Oracle モード). */
 @RunWith(SpringRunner::class)
@@ -69,8 +69,13 @@ class TransferServiceIT {
 
         val r =
             transferService.transfer(
-                "001", "1000001", "002", "2000001",
-                BigDecimal("100000"), "家賃", "teller",
+                "001",
+                "1000001",
+                "002",
+                "2000001",
+                BigDecimal("100000"),
+                "家賃",
+                "teller",
             )
 
         assertNotNull(r.referenceNo)

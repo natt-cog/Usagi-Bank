@@ -1,19 +1,22 @@
 package jp.usagi.bank.config
 
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 /**
  * 応答時間ロギング. 勘定系SLA (オンライン 2秒以内) の監視用.
  */
 @Component
 class RequestTimingInterceptor : HandlerInterceptorAdapter() {
-
-    override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+    override fun preHandle(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        handler: Any,
+    ): Boolean {
         request.setAttribute(START_ATTR, System.currentTimeMillis())
         return true
     }

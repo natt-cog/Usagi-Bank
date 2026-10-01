@@ -1,11 +1,5 @@
 package jp.usagi.bank.service
 
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.IOException
-import java.math.BigDecimal
-import java.nio.file.Files
-import java.nio.file.Paths
 import jp.usagi.bank.domain.Account
 import jp.usagi.bank.domain.AccountStatus
 import jp.usagi.bank.domain.AccountType
@@ -23,6 +17,12 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.transaction.annotation.Transactional
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.math.BigDecimal
+import java.nio.file.Files
+import java.nio.file.Paths
 
 /**
  * ホスト連携ファイル (固定長 52 桁, MS932) のゴールデンファイルテスト.

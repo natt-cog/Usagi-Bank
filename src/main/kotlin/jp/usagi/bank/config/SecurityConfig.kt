@@ -18,19 +18,23 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @Configuration
 @EnableWebSecurity
 class SecurityConfig {
-
     @Configuration
     @Order(1)
     class ApiSecurityConfig : WebSecurityConfigurerAdapter() {
-
         override fun configure(http: HttpSecurity) {
-            http.antMatcher("/api/**")
-                .csrf().disable()
+            http
+                .antMatcher("/api/**")
+                .csrf()
+                .disable()
                 .authorizeRequests()
-                    .antMatchers("/api/batch/**").hasRole("ADMIN")
-                    .antMatchers(HttpMethod.GET, "/api/**").hasAnyRole("TELLER", "ADMIN", "AUDITOR")
-                    .antMatchers(HttpMethod.POST, "/api/transfers").hasAnyRole("TELLER", "ADMIN")
-                    .anyRequest().authenticated()
+                .antMatchers("/api/batch/**")
+                .hasRole("ADMIN")
+                .antMatchers(HttpMethod.GET, "/api/**")
+                .hasAnyRole("TELLER", "ADMIN", "AUDITOR")
+                .antMatchers(HttpMethod.POST, "/api/transfers")
+                .hasAnyRole("TELLER", "ADMIN")
+                .anyRequest()
+                .authenticated()
                 .and()
                 .httpBasic()
         }
@@ -39,39 +43,54 @@ class SecurityConfig {
     @Configuration
     @Order(2)
     class WebSecurityConfig : WebSecurityConfigurerAdapter() {
-
         override fun configure(http: HttpSecurity) {
-            http.authorizeRequests()
-                    .antMatchers("/static/**", "/webjars/**", "/login", "/health").permitAll()
-                    .antMatchers("/admin/**").hasRole("ADMIN")
-                    .antMatchers(HttpMethod.POST, "/accounts/*/*/status").hasRole("ADMIN")
-                    .antMatchers("/transfer/**").hasAnyRole("TELLER", "ADMIN")
-                    .antMatchers(HttpMethod.POST, "/accounts/**", "/customers/**").hasAnyRole("TELLER", "ADMIN")
-                    .anyRequest().authenticated()
+            http
+                .authorizeRequests()
+                .antMatchers("/static/**", "/webjars/**", "/login", "/health")
+                .permitAll()
+                .antMatchers("/admin/**")
+                .hasRole("ADMIN")
+                .antMatchers(HttpMethod.POST, "/accounts/*/*/status")
+                .hasRole("ADMIN")
+                .antMatchers("/transfer/**")
+                .hasAnyRole("TELLER", "ADMIN")
+                .antMatchers(HttpMethod.POST, "/accounts/**", "/customers/**")
+                .hasAnyRole("TELLER", "ADMIN")
+                .anyRequest()
+                .authenticated()
                 .and()
                 .formLogin()
-                    .loginPage("/login")
-                    .defaultSuccessUrl("/dashboard", true)
-                    .failureUrl("/login?error")
-                    .permitAll()
+                .loginPage("/login")
+                .defaultSuccessUrl("/dashboard", true)
+                .failureUrl("/login?error")
+                .permitAll()
                 .and()
                 .logout()
-                    .logoutUrl("/logout")
-                    .logoutSuccessUrl("/login?logout")
-                    .permitAll()
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout")
+                .permitAll()
                 .and()
-                .headers().frameOptions().sameOrigin()
+                .headers()
+                .frameOptions()
+                .sameOrigin()
         }
     }
 
     @Autowired
     fun configureGlobal(auth: AuthenticationManagerBuilder) {
         // TODO: 本番は行内LDAPへ切替 (2015年度課題)
-        auth.inMemoryAuthentication()
-            .withUser("teller").password("teller123").roles("TELLER")
+        auth
+            .inMemoryAuthentication()
+            .withUser("teller")
+            .password("teller123")
+            .roles("TELLER")
             .and()
-            .withUser("admin").password("admin123").roles("ADMIN", "TELLER")
+            .withUser("admin")
+            .password("admin123")
+            .roles("ADMIN", "TELLER")
             .and()
-            .withUser("auditor").password("audit123").roles("AUDITOR")
+            .withUser("auditor")
+            .password("audit123")
+            .roles("AUDITOR")
     }
 }

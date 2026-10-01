@@ -29,7 +29,6 @@ import javax.validation.constraints.Pattern
 @Entity
 @Table(name = "ACCOUNT", uniqueConstraints = [UniqueConstraint(columnNames = ["BRANCH_CODE", "ACCOUNT_NO"])])
 class Account {
-
     @field:Id
     @field:GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_seq")
     @field:SequenceGenerator(name = "account_seq", sequenceName = "SEQ_ACCOUNT", allocationSize = 1)

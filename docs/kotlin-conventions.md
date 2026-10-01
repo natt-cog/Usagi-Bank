@@ -6,7 +6,7 @@ Rules every conversion ticket on the `kotlin-migration` branch followed. The por
 
 - Kotlin sources live in `src/main/kotlin` / `src/test/kotlin`, **same package** (`jp.usagi.bank.…`), one class per file, same file name as the Java class (`Account.java` → `Account.kt`).
 - Delete the Java file in the same PR. One package (e.g. `domain`) or one test class per PR, so each PR is reviewable and `mvn -B test` stays green at every merge.
-- Surefire's `**/*Test.java` / `**/*IT.java` includes are matched against class files, so converted tests keep their `*Test` / `*IT` names and need no build change.
+- Surefire's includes in `pom.xml` are `**/*Test.class` / `**/*IT.class` (class-file patterns, so Kotlin-compiled tests are discovered); converted tests keep their `*Test` / `*IT` names.
 - During the migration Kotlin compiled first and `javac` then saw the Kotlin classes, so remaining Java callers kept working as long as the JVM signatures were preserved; JSPs (`${account.displayNo}`) still rely on those signatures (see *Interop*).
 
 ## Entities (`domain/`)

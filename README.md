@@ -83,6 +83,10 @@ src/main/webapp/WEB-INF/jsp      JSP/JSTL pages (Japanese UI) + jQuery 1.12.4
 batch/cobol/UBEOD001.cbl         COBOL 日次利息積数バッチ (GnuCOBOL), data/, expected/, run.sh
 ```
 
+## Kotlin migration (branch `kotlin-migration`)
+
+The Java → Kotlin port lands incrementally on the `kotlin-migration` branch (mixed Kotlin/Java build, same Java 8 / Spring Boot 1.5.22 runtime). Every conversion follows [docs/kotlin-conventions.md](docs/kotlin-conventions.md).
+
 ## Modernization tracks (demo scenarios)
 
 The codebase is seeded with hotspots for each track. All of them can be validated by the existing test suite — the tests are the parity contract.

@@ -10,7 +10,7 @@
 
 移行・モダナイゼーションのデモ対象として、あえて*レガシー*な構成にしています: **Spring Boot 1.5.22 / Java 8 / JSP + jQuery / JUnit 4 / H2 上の Oracle 方言 SQL / GnuCOBOL の日次バッチ / Jenkinsfile**。
 
-2010 年代半ばの銀行システムにありがちな要素を意図的に盛り込んでいます: `javax.*`、`WebSecurityConfigurerAdapter`、Spring Data `findOne()`、Hibernate `Criteria`、Joda-Time、Ehcache 2、JAXB、`BigDecimal.ROUND_DOWN`、MS932 固定長ホストファイル、全銀の預金種目コード、そし��� 1 銭単位で同じファイルを出力し続けなければならない 1998 年製の COBOL プログラム。
+2010 年代半ばの銀行システムにありがちな要素を意図的に盛り込んでいます: `javax.*`、`WebSecurityConfigurerAdapter`、Spring Data `findOne()`、Hibernate `Criteria`、Joda-Time、Ehcache 2、JAXB、`BigDecimal.ROUND_DOWN`、MS932 固定長ホストファイル、全銀の預金種目コード、そして 1 銭単位で同じファイルを出力し続けなければならない 1998 年製の COBOL プログラム。
 
 ## 業務機能
 
@@ -19,7 +19,7 @@
 | ダッシュボード | 営業日, 店別残高, 残高上位顧客, 有効口座一覧 |
 | 顧客 (CIF) | 検索・登録 (CIF 自動採番)・本人確認 (KYC) ステータス更新・口座開設 |
 | 口座 | 店番 / 口座番号 / 科目 (普通 1・当座 2・貯蓄 4・定期 9) / 状態 (有効・凍結・休眠・解約) / 入出金 / 取引明細 (ページング) |
-| 振込 | 同一店内 0 円, 他店宛 3 万円未満 110 円・3 ���円以上 220 円, 1 日あたり振込限度額 (既定 100 万円), 楽観ロック + 口座ロック順序制御 |
+| 振込 | 同一店内 0 円, 他店宛 3 万円未満 110 円・3 万円以上 220 円, 1 日あたり振込限度額 (既定 100 万円), 楽観ロック + 口座ロック順序制御 |
 | 明細 XML | JAXB による取引明細 XML (`/accounts/{店番}/{口座番号}/statement.xml`) |
 | 利息 | 日次利息積数 (年利 ÷ 365, 銭未満切捨て), 半期利払い (2 月・8 月) |
 | ホストファイル連携 | `ACCOUNTS.DAT` 出力 / `ACCRUED.DAT` 取込 (固定長 52 桁, MS932, H/D/T レコード, トレーラ件数照合) |

@@ -4,6 +4,32 @@ A deliberately *legacy* Japanese core-banking application — **Spring Boot 1.5.
 
 Everything a mid-2010s bank system would have is here on purpose: `javax.*`, `WebSecurityConfigurerAdapter`, Spring Data `findOne()`, Hibernate `Criteria`, Joda-Time, Ehcache 2, JAXB, `BigDecimal.ROUND_DOWN`, MS932 fixed-width host files, Zengin account-type codes, and a 1998 COBOL program that must keep producing the same file to the sen (銭).
 
+## デモ (Demo)
+
+### 振込 (Transfer) — 窓口担当 `teller`
+
+ログイン → 振込画面で店番・口座番号を入力すると名義人が自動照会され、全角数字 `５００００` は半角に正規化されます。確認ダイアログ後に振込完了 (他店宛 3 万円以上 → 手数料 220 円)、出金口座の取引明細に振込出金と手数料が記帳されます。
+
+![振込デモ](docs/images/demo-transfer.gif)
+
+### 顧客登録 → 本人確認 → 口座開設 (Customer onboarding)
+
+新規顧客を登録 (CIF 自動採番) → 本人確認ステータスを「確認済」に更新 → 初回入金額 `１００，０００` で普通預金口座を開設。
+
+![顧客登録デモ](docs/images/demo-onboarding.gif)
+
+MP4 版: [demo-transfer.mp4](docs/videos/demo-transfer.mp4) / [demo-onboarding.mp4](docs/videos/demo-onboarding.mp4)
+
+### 画面一覧 (Screenshots)
+
+| | |
+|---|---|
+| **ログイン** — 端末ログイン (デモユーザ表示付き)<br>![ログイン](docs/images/01-login.png) | **ダッシュボード** — 営業日, 店別預金残高, 残高上位顧客, 有効口座一覧<br>![ダッシュボード](docs/images/02-dashboard.png) |
+| **口座検索** — 店番・科目・状態・残高範囲で検索<br>![口座検索](docs/images/03-account-search.png) | **口座照会** — 残高・未払利息, 窓口入出金, 取引明細 (ページング), 明細 XML<br>![口座照会](docs/images/04-account-detail.png) |
+| **顧客一覧** — CIF・氏名・本人確認ステータス<br>![顧客一覧](docs/images/05-customers.png) | **顧客照会** — 本人確認 (KYC) 更新, 口座開設, 保有口座<br>![顧客照会](docs/images/06-customer-detail.png) |
+| **振込入力** — 名義人の自動照会, 手数料・限度額の案内<br>![振込入力](docs/images/07-transfer-form.png) | **振込完了** — 参照番号, 振込手数料, 出金後残高<br>![振込完了](docs/images/08-transfer-complete.png) |
+| **監査ロール (`auditor`)** — 照会のみ: 窓口取引・振込メニューは非表示<br>![監査ロール](docs/images/09-auditor-readonly.png) | |
+
 ## 業務機能 (Business features)
 
 | 画面 / API | 内容 |
@@ -81,6 +107,7 @@ src/main/java/jp/usagi/bank/
 src/main/resources/db/migration  Flyway 4: V1 schema (Oracle DDL dialect), V2 seed data (5 支店, 10 顧客, 15 口座)
 src/main/webapp/WEB-INF/jsp      JSP/JSTL pages (Japanese UI) + jQuery 1.12.4
 batch/cobol/UBEOD001.cbl         COBOL 日次利息積数バッチ (GnuCOBOL), data/, expected/, run.sh
+docs/images, docs/videos          README screenshots and demo recordings
 ```
 
 ## Modernization tracks (demo scenarios)

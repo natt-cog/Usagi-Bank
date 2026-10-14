@@ -7,9 +7,11 @@
 <meta charset="UTF-8">
 <title>ログイン | うさぎ銀行 勘定系オンライン</title>
 <link rel="stylesheet" href="${ctx}/static/css/usagi.css">
+<script src="${ctx}/static/js/theme.js"></script>
 </head>
 <body class="login">
 <div class="login-box">
+  <div class="theme-bar"><button type="button" id="theme-toggle" class="link theme-toggle" aria-pressed="false">&#9790; ダークモード</button></div>
   <h1>うさぎ銀行<br><small>勘定系オンライン 端末ログイン</small></h1>
   <c:if test="${param.error != null}"><div class="flash ng">ユーザIDまたはパスワードが正しくありません</div></c:if>
   <c:if test="${param.logout != null}"><div class="flash ok">ログアウトしました</div></c:if>

@@ -1,0 +1,10 @@
+<%@ page pageEncoding="UTF-8" %>
+<script>
+(function () {
+    try {
+        if (window.localStorage && localStorage.getItem('usagi.theme') === 'dark') {
+            document.body.className += ' dark';
+        }
+    } catch (e) {}
+})();
+</script>

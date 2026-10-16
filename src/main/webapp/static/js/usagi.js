@@ -34,6 +34,13 @@
         lookup(fs, fs.find('.lookup'));
     });
 
+    // 表示モード切替 (ライト / ダーク)。初期適用は common/theme-init.jspf
+    $(document).on('click', '#theme-toggle', function () {
+        var dark = !$('body').hasClass('dark');
+        $('body').toggleClass('dark', dark);
+        try { window.localStorage.setItem('usagi.theme', dark ? 'dark' : 'light'); } catch (e) {}
+    });
+
     // 簡易ソート (テーブルヘッダクリック)
     $(document).on('click', 'table.sortable th', function () {
         var th = $(this), table = th.closest('table'), idx = th.index();

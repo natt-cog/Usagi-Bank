@@ -28,3 +28,6 @@ batch/golden/work-java/
 batch/golden/work-compare/
 batch/golden/work-integration/
 batch/java/work/
+
+# Python
+__pycache__/

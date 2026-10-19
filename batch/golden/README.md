@@ -10,6 +10,7 @@ batch/golden/
   run-cobol.sh        全ケースを COBOL で実行し、期待値とバイト比較する
   run-java.sh         全ケースを Java 版（batch/java/ubeod001.sh）で実行し、期待値とバイト比較する
   compare.sh          新旧比較ハーネス: COBOL 版と Java 版を同じ入力で実行し、ケースごとの一致 / 不一致を表で出す
+  integration.sh      ファイル連携の結合テスト: アプリの API → COBOL 版 / Java 版 → アプリの API を新旧両方で通す
   golden-lib.sh       比較処理の本体（run-cobol.sh・run-java.sh・compare.sh で共用）
   <ケース名>/
     ACCOUNTS.DAT      入力（ないケース = 入力ファイルなし）
@@ -20,6 +21,7 @@ batch/golden/
   work/               run-cobol.sh の作業ディレクトリ（git 管理外）
   work-java/          run-java.sh の作業ディレクトリ（git 管理外）
   work-compare/       compare.sh の作業ディレクトリ（git 管理外）
+  work-integration/   integration.sh の作業ディレクトリ（git 管理外）
 ```
 
 比較の対象は仕様書 §8 の「バイト一致が必要な範囲」である ACCRUED.DAT・UBEOD001.LOG・stdout・終了コードの 4 つ。stderr は比較しない（出力があれば参考として表示する）。
@@ -163,3 +165,26 @@ Java          : 未実装 (src/main/java/jp/usagi/bank/batch/host/Ubeod001.java 
 - `cobc`（GnuCOBOL）が必要。COBOL を消すフェーズ（p5）以降は `run-java.sh` を使う。
 - 作業ディレクトリは `work-compare/cobol/<ケース名>/`・`work-compare/java/<ケース名>/`。実行のたびに作り直す。
 - `--update` は受け付けない（期待値は `run-cobol.sh --update` で作る）。
+
+## ファイル連携の結合テスト（integration.sh）
+
+ゴールデンセットはバッチ単体の比較。`integration.sh` は実際の連携経路（アプリが出す ACCOUNTS.DAT → ホストバッチ → アプリへの ACCRUED.DAT 取込）を COBOL 版・Java 版の両方で通し、取込結果が同じであることを確かめる。アプリは自分で起動・停止する（`mvn spring-boot:run`、H2 は起動ごとに初期化）。
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+batch/golden/integration.sh                     # 1 分ほど。ポート 8080 を空けておく
+```
+
+| 手順 | 内容 |
+|---|---|
+| 1 | アプリを起動し、`GET /api/batch/accounts-file`（HTTP Basic、admin）で ACCOUNTS.DAT を取得 |
+| 2 | 同じ ACCOUNTS.DAT を `batch/cobol/run.sh` と `batch/java/run.sh` に流し、ACCRUED.DAT・UBEOD001.LOG・stdout・RC が新旧バイト一致することを確かめる |
+| 3 | Java 版の ACCRUED.DAT を `POST /api/batch/accrued-file` で取り込み、更新件数、各口座の未払利息、`GET /api/accounts` を記録・確認 |
+| 4 | アプリを再起動し、ACCOUNTS.DAT が手順 1 と同じ（H2 が初期化された）ことを確かめてから、COBOL 版の ACCRUED.DAT で手順 3 と同じことをする |
+| 5 | 新旧の取込結果（処理日・更新件数・スキップ件数、各口座の未払利息、`GET /api/accounts`）を比べ、口座ごとの表を出す。未払利息の増分の合計が UBEOD001.LOG の当日利息合計と同じことも確かめる |
+
+- 未払利息は `GET /api/accounts` の JSON（`AccountDto`）に含まれないため、取込後に `GET /api/batch/accounts-file` で再取得して見る。再取得したファイルは、行末空白を除くと取り込んだ ACCRUED.DAT とバイト一致する（未払利息とトレーラの合計を含む）ことも確かめる。
+- API の ACCOUNTS.DAT は処理日（ヘッダ）が業務日付（実行日）になるので、`run.sh` 自身の `GOLDEN OK / MISMATCH`（golden/baseline との比較）は MISMATCH・終了コード 1 になる。判定には使わず、代わりに「baseline の期待値の処理日を差し替えたもの」と一致するかを参考として出す。
+- `batch/cobol/run.sh` は `set -e` のため RC≠0 だと `RC=` を出さずに終わる（仕様書 E25）。そのときは `run.sh` の終了コードを RC として記録し、RC≠0 は NG にする。
+- 終了コード: 0 = 新旧一致、1 = 不一致あり、2 = 起動失敗など（ポート使用中、ビルド失敗、API エラー）。
+- `cobc`・JDK 8・Maven・curl・jq・bc が必要。COBOL を消すフェーズ（p5）以降はこのスクリプトは使えない。

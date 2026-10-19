@@ -26,4 +26,5 @@ batch/golden/work/
 !batch/golden/*/UBEOD001.LOG
 batch/golden/work-java/
 batch/golden/work-compare/
+batch/golden/work-integration/
 batch/java/work/

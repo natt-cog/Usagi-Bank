@@ -1,15 +1,19 @@
 #!/bin/bash
 # UBEOD001 新旧比較ハーネス (COBOL 版 ↔ Java 版)
-#   使い方: ./compare.sh [CASE...]
-#     引数なし  : 全ケースを COBOL 版と Java 版で同じ入力から実行し、ケースごとの一致 / 不一致を表で出す
-#     CASE...   : 指定したケースだけ実行する
+#   使い方: ./compare.sh [--require-java] [CASE...]
+#     引数なし       : 全ケースを COBOL 版と Java 版で同じ入力から実行し、ケースごとの一致 / 不一致を表で出す
+#     CASE...        : 指定したケースだけ実行する
+#     --require-java : Java 版が未実装なら終了コード 3 にする (p3・Jenkins ではこれを付ける)
 #   比べるもの (golden-lib.sh の比較処理をそのまま使う。ACCRUED.DAT・UBEOD001.LOG・stdout・RC のバイト比較):
 #     COBOL    = COBOL 版の実行結果 ↔ 期待値
 #     Java     = Java 版の実行結果  ↔ 期待値
 #     新旧     = Java 版の実行結果  ↔ COBOL 版の実行結果
 #   Java 版がまだない (src/main/java/jp/usagi/bank/batch/host/Ubeod001.java がない) ときは
 #   Java・新旧の列を「未実装」とし、COBOL ↔ 期待値の比較だけで判定する。
-#   終了コード: 0 = 不一致なし, 1 = 不一致あり, 2 = コンパイル・ビルド失敗など
+#   COBOL 版は run-cobol.sh と同じく cobc でビルドした実行ファイルを直接呼ぶ
+#   (batch/cobol/run.sh は set -e のため RC≠0 で比較まで進まない。仕様書 E25)。
+#   終了コード: 0 = 不一致なし, 1 = 不一致あり, 2 = コンパイル・ビルド失敗など,
+#               3 = --require-java を付けたのに Java 版が未実装 (不一致があれば 1 を優先)
 #   作業ディレクトリ: batch/golden/work-compare/{cobol,java}/ (git 管理外)
 #   必要なもの: GnuCOBOL の cobc、JDK 8 と Maven (Java 版があるとき)
 set -u
@@ -22,11 +26,12 @@ JAVA_CMD=$ROOT/batch/java/ubeod001.sh
 JAVA_SRC=$ROOT/src/main/java/jp/usagi/bank/batch/host/Ubeod001.java
 . "$GOLDEN_DIR/golden-lib.sh"
 
-cases=""
+cases="" require_java=0
 for a in "$@"; do
   case $a in
+    --require-java) require_java=1 ;;
     --update) echo "compare.sh: --update は使えない (期待値は run-cobol.sh --update で作る)" >&2; exit 2 ;;
-    -*) echo "使い方: $0 [CASE...]" >&2; exit 2 ;;
+    -*) echo "使い方: $0 [--require-java] [CASE...]" >&2; exit 2 ;;
     *) cases="$cases $a" ;;
   esac
 done
@@ -98,4 +103,9 @@ if [ $java_impl = 1 ]; then
 else
   echo "Java          : 未実装 (${JAVA_SRC#$ROOT/} がない。COBOL ↔ 期待値だけで判定)"
 fi
-[ $((ng_cobol + ng_java + ng_cross)) = 0 ]
+[ $((ng_cobol + ng_java + ng_cross)) = 0 ] || exit 1
+if [ $require_java = 1 ] && [ $java_impl = 0 ]; then
+  echo "--require-java: Java 版が未実装のため終了コード 3"
+  exit 3
+fi
+exit 0

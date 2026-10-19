@@ -131,6 +131,7 @@ COBOL 版と Java 版を同じ入力で実行し、ケースごとに次の 3 �
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 batch/golden/compare.sh                         # 全ケース
 batch/golden/compare.sh baseline ms932-dbcs     # 指定したケースだけ
+batch/golden/compare.sh --require-java          # Java 版が未実装なら終了コード 3 (p3・Jenkins ではこれを使う)
 ```
 
 ```
@@ -143,8 +144,9 @@ COBOL ↔ 期待値: 一致=26 不一致=0 (全 26 ケース)
 Java          : 未実装 (src/main/java/jp/usagi/bank/batch/host/Ubeod001.java がない。COBOL ↔ 期待値だけで判定)
 ```
 
-- 終了コード: 0 = 不一致なし、1 = 1 件でも不一致あり、2 = コンパイル・ビルド失敗など。不一致があれば表のあとに `cat -A` 表示の diff を出す（新旧の diff は左が COBOL、右が Java）。
-- Java 版本体がまだないときは Java・新旧の列を「未実装」とし、COBOL ↔ 期待値だけで判定する（全ケース一致なら終了コード 0）。
+- 終了コード: 0 = 不一致なし、1 = 1 件でも不一致あり、2 = コンパイル・ビルド失敗など、3 = `--require-java` を付けたのに Java 版が未実装（不一致があれば 1 を優先）。不一致があれば表のあとに `cat -A` 表示の diff を出す（新旧の diff は左が COBOL、右が Java）。
+- Java 版本体がまだないときは Java・新旧の列を「未実装」とし、COBOL ↔ 期待値だけで判定する（全ケース一致なら終了コード 0）。**p3 の各ステップと Jenkins では `--require-java` を付ける**。付けると、Java の列に「未実装」があれば終了コード 3 になる（「未実装」のまま合格扱いにしない）。
+- COBOL 版は `batch/cobol/run.sh` ではなく、`run-cobol.sh` と同じく `cobc` でビルドした実行ファイルを直接呼ぶ。`run.sh` は `set -e` のため RC≠0（RC=8・12）のケースで比較まで進まないため（仕様書 E25）。
 - `cobc`（GnuCOBOL）が必要。COBOL を消すフェーズ（p5）以降は `run-java.sh` を使う。
 - 作業ディレクトリは `work-compare/cobol/<ケース名>/`・`work-compare/java/<ケース名>/`。実行のたびに作り直す。
 - `--update` は受け付けない（期待値は `run-cobol.sh --update` で作る）。

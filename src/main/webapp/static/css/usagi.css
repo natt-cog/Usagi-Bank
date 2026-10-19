@@ -58,3 +58,42 @@ body.login { background: #0b4f8a; }
 .login-box input { width: 100%; box-sizing: border-box; }
 .login-box button { width: 100%; margin-top: 8px; }
 .hint { font-size: 11px; color: #888; text-align: center; }
+
+/* テーマ切替ボタン */
+button.theme-toggle { background: transparent; border: 1px solid #ffd966; color: #ffd966; padding: 1px 8px; margin-right: 12px; font-size: 12px; cursor: pointer; }
+.login-tools { text-align: right; margin: -12px -20px 4px 0; }
+.login-tools button.theme-toggle { width: auto; margin-top: 0; margin-right: 0; border-color: #7a8a99; color: #0b4f8a; }
+
+/* ダークモード (body.dark) */
+body.dark { color: #d6dde5; background: #12171d; }
+body.dark a { color: #7fb6ea; }
+body.dark #header { background: #0a2540; }
+body.dark #nav { background: #1c242d; border-bottom-color: #2f3b47; }
+body.dark #footer { color: #8a96a3; }
+body.dark h1 { border-left-color: #4f95d6; }
+body.dark h1 small, body.dark h2 small, body.dark .kana, body.dark .note { color: #9aa6b2; }
+body.dark .panel { background: #1a2129; border-color: #2f3b47; }
+body.dark table.grid th, body.dark table.grid td, body.dark table.kv th, body.dark table.kv td { border-color: #33404d; }
+body.dark table.grid th, body.dark table.kv th { background: #232d38; }
+body.dark table.grid tr:nth-child(even) td { background: #1f2730; }
+body.dark table.grid td.empty { color: #8a96a3; }
+body.dark .flash.ok { background: #16301f; border-color: #3f7a4f; color: #9ad5a8; }
+body.dark .flash.ng { background: #3a1b1b; border-color: #a04848; color: #f2a5a5; }
+body.dark .inline-form { border-bottom-color: #3a4652; }
+body.dark button, body.dark a.button { background: #26303b; border-color: #4a5a6a; color: #d6dde5; }
+body.dark button.primary { background: #1f6fb8; border-color: #2b83d1; color: #fff; }
+body.dark button.warn { background: #b23a2e; border-color: #d0574a; color: #fff; }
+body.dark button.link { background: none; border: none; color: #ffd966; }
+body.dark button.theme-toggle { background: transparent; border-color: #ffd966; color: #ffd966; }
+body.dark input[type=text], body.dark input[type=password], body.dark select { background: #10151b; border-color: #4a5a6a; color: #e3e8ee; }
+body.dark fieldset { border-color: #33404d; }
+body.dark .lookup { color: #7fb6ea; }
+body.dark .req, body.dark .err { color: #f28b82; }
+body.dark .status-FROZEN td, body.dark td.status-FROZEN, body.dark .kyc-PENDING { color: #f0b45a; }
+body.dark .status-CLOSED td, body.dark td.status-CLOSED { color: #6f7b87; }
+body.dark .kyc-REJECTED { color: #f28b82; }
+body.dark .kyc-VERIFIED { color: #81c995; }
+body.dark.login { background: #0a1724; }
+body.dark .login-box { background: #1a2129; border-color: #2f3b47; }
+body.dark .login-box h1 small, body.dark .hint { color: #9aa6b2; }
+body.dark .login-tools button.theme-toggle { border-color: #4a5a6a; color: #7fb6ea; }

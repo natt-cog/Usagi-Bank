@@ -9,7 +9,10 @@
 <link rel="stylesheet" href="${ctx}/static/css/usagi.css">
 </head>
 <body class="login">
+<%@ include file="common/theme-init.jspf" %>
 <div class="login-box">
+  <div class="login-tools"><button type="button" id="theme-toggle" class="theme-toggle" onclick="usagiToggleTheme()" aria-pressed="false">&#9790; ダーク</button></div>
+  <script>usagiSyncThemeToggle();</script>
   <h1>うさぎ銀行<br><small>勘定系オンライン 端末ログイン</small></h1>
   <c:if test="${param.error != null}"><div class="flash ng">ユーザIDまたはパスワードが正しくありません</div></c:if>
   <c:if test="${param.logout != null}"><div class="flash ok">ログアウトしました</div></c:if>

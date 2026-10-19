@@ -117,6 +117,19 @@ batch/golden/run-java.sh baseline no-input      # 指定したケースだけ
 - **Java 版で `--update` しない。** 期待値は COBOL の実行結果だけで作る。
 - Java 版本体（`src/main/java/jp/usagi/bank/batch/host/Ubeod001.java`）ができるまでは、全ケース NG（RC=2、stderr に「未実装」）になる。
 
+## JUnit（mvn test）
+
+GnuCOBOL がない環境でも同値性を守れるよう、`mvn test` に次の 2 つのテストを入れてある。COBOL は呼ばず、このディレクトリの期待値（COBOL で作ったもの）だけを使う。
+
+| テスト | 内容 |
+|---|---|
+| `Ubeod001GoldenTest` | このディレクトリの全ケース（`work`・`work-*` を除く）を `Ubeod001.run(dir, out)` で一時ディレクトリで実行し、ACCRUED.DAT・UBEOD001.LOG・stdout・RC を期待値とバイト比較する。期待値ファイルがないものは作られないこと、一時ファイル（`*.tmp`）が残らないことも確かめる。ケースを足すと自動で対象になる |
+| `Ubeod001Test` | ゴールデンに入れていない Java 版だけのエラー（設計メモ §7.2、RC=12）: 数値項目に数字以外（E17 後半・E18 ほか）、トレーラ件数に空白以外の数字以外、NUL、入力がディレクトリ・読めない、出力ファイルが作れない・置き換えられない。期待する stdout・RC・出力なしをテストに直接書いている |
+
+```bash
+JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 mvn -B test -Dtest='Ubeod001*'
+```
+
 ## 新旧比較ハーネス（compare.sh）
 
 COBOL 版と Java 版を同じ入力で実行し、ケースごとに次の 3 つを比べて表（Markdown）で出す。比較は `golden-lib.sh` の `golden_compare_case`（ACCRUED.DAT・UBEOD001.LOG・stdout・RC のバイト比較）をそのまま使う。

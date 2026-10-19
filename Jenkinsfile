@@ -58,6 +58,13 @@ pipeline {
             }
         }
 
+        stage('UBEOD001 COBOL/Java Parity') {
+            // 同じ入力で COBOL 版と Java 版を実行し, 期待値・新旧をバイト比較 (batch/golden/README.md)
+            steps {
+                sh 'batch/golden/compare.sh --require-java'
+            }
+        }
+
         stage('Package WAR') {
             steps {
                 sh 'mvn -B -s /opt/jenkins/settings.xml -DskipTests package'

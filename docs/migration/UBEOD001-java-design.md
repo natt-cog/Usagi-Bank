@@ -15,8 +15,8 @@
 |---|---|---|---|
 | 1 | 形（d-target・決定済み） | ファイル入出力の CLI バッチ。Java 8、既存の Maven プロジェクト（`usagi-bank`）の中に置く。Spring は起動しない | §1 |
 | 2 | パッケージ・クラス | `jp.usagi.bank.batch.host` に `Ubeod001`（main）ほか 6 クラス | §2 |
-| 3 | 起動方法 | `batch/java/run.sh`。`target/classes` + Maven が出すクラスパスで `java -cp` 起動（jar は作らない） | §3 |
-| 4 | ゴールデン比較 | `batch/java/run.sh` を `golden_main … -- batch/java/run.sh` にそのまま渡せる形にする。比較用に `batch/golden/run-java.sh` を置く | §3.3 |
+| 3 | 起動方法 | 2 つのスクリプトに分ける。`batch/java/ubeod001.sh` = COBOL の実行ファイルに当たる起動コマンド（カレントで実行、終了コード = RC）。`batch/java/run.sh [ACCOUNTS.DAT]` = `batch/cobol/run.sh` と同じ使い方。`target/classes` + Maven が出すクラスパスで `java -cp` 起動（jar は作らない） | §3.1、§3.2 |
+| 4 | ゴールデン比較 | `batch/java/ubeod001.sh` を `golden_main … -- batch/java/ubeod001.sh` にそのまま渡せる形にする。比較用に `batch/golden/run-java.sh` を置く | §3.3 |
 | 5 | 数値 | 全項目 BigDecimal。格納はすべて `Pic.store`（小数部 `RoundingMode.DOWN`、整数部は 10^n の剰余） | §5 |
 | 6 | 桁あふれ（d-overflow・決定済み） | COBOL に合わせて上位桁を切り捨て、RC=0。メッセージなし | §5.3 |
 | 7 | 利息計算 | `InterestService.dailyInterest` を共有する。`WS-WORK` の 15 桁切捨てを差し込める 3 引数版を追加し、2 引数版はそれを呼ぶ | §6 |
@@ -63,32 +63,69 @@ d-target（決定済み）のとおり、**ファイル入出力の CLI バッ�
 
 ## 3. 起動方法
 
-### 3.1 `batch/java/run.sh`
+### 3.1 `batch/java/ubeod001.sh` と `batch/java/run.sh`
 
-`batch/java/run.sh` は COBOL の実行ファイル（`run-cobol.sh` が作る `work/ubeod001`）と **同じ振る舞いをするコマンド** にする。
+起動用のスクリプトは 2 つに分ける。
+
+| スクリプト | 役割 | COBOL の対応 | 呼ぶもの |
+|---|---|---|---|
+| `batch/java/ubeod001.sh` | Java 版 UBEOD001 そのものを起動するコマンド。カレントディレクトリで実行し、stdout はプログラムの出力だけ、終了コード = RC | `run-cobol.sh` が作る実行ファイル `work/ubeod001` | `golden_main`（`run-java.sh`）、`run.sh`、ジョブ管理 |
+| `batch/java/run.sh` | 手で動かして確かめる用。`batch/cobol/run.sh` と同じ使い方 | `batch/cobol/run.sh` | 開発者・デモ |
+
+#### `batch/java/ubeod001.sh`
 
 ```
 使い方:
-  batch/java/run.sh                 カレントディレクトリで UBEOD001 を実行する (golden_main から呼ぶ形)
-  batch/java/run.sh ACCOUNTS.DAT    batch/cobol/run.sh と同じ使い方: 指定ファイルを batch/java/work/ にコピーし、そこで実行する
-  batch/java/run.sh --build-only    ビルドだけして終了する (run-java.sh が最初に 1 回呼ぶ。§3.3)
+  batch/java/ubeod001.sh               カレントディレクトリで UBEOD001 を実行する
+  batch/java/ubeod001.sh --build-only  ビルドだけして終了する (run-java.sh が最初に 1 回呼ぶ。§3.3)
 入力 : ./ACCOUNTS.DAT              出力: ./ACCRUED.DAT, ./UBEOD001.LOG
 stdout: UBEOD001 の DISPLAY メッセージだけ   終了コード: UBEOD001 の RC (0 / 8 / 12)
 ```
 
 | 状況 | 動作 |
 |---|---|
-| 引数なし | カレントディレクトリで実行する。stdout にはプログラムのメッセージだけを出し、終了コード = RC。`golden_main [--update] [CASE...] -- batch/java/run.sh` がケースの作業ディレクトリをカレントにして呼ぶので、そのまま比較できる |
-| 引数 1 つ | `batch/cobol/run.sh` と同じ: スクリプトのディレクトリに `cd` し（相対パスは `batch/java/` 基準）、`work/` を作って入力を `work/ACCOUNTS.DAT` にコピーし、`work/` で実行。終了コード = RC |
-| ビルド | `target/classes/jp/usagi/bank/batch/host/Ubeod001.class` か `target/ubeod001.classpath` がなければ、リポジトリのルートで `mvn -B -q -DskipTests compile dependency:build-classpath -Dmdep.includeScope=runtime -Dmdep.outputFile=target/ubeod001.classpath` を実行する。Maven の出力はすべて **stderr** に回す（stdout はゴールデン比較の対象のため） |
+| 引数なし | カレントディレクトリで実行する。stdout にはプログラムのメッセージだけを出し、終了コード = RC。`golden_main [--update] [CASE...] -- batch/java/ubeod001.sh` がケースの作業ディレクトリをカレントにして呼ぶので、そのまま比較できる。スクリプト自身の場所は `$(cd "$(dirname "$0")" && pwd)` で求め、カレントがどこでもリポジトリのルートを見つけられるようにする |
+| `--build-only` | 下の「ビルド」を必ず実行して終了する（class の有無に関係なく `mvn compile` を走らせ、古い class で比較しないようにする）。成功なら 0 |
+| それ以外の引数 | stderr に使い方を出して終了コード 2 |
+| ビルド | 引数なしのとき、`target/classes/jp/usagi/bank/batch/host/Ubeod001.class` か `target/ubeod001.classpath` がなければ、リポジトリのルートで `mvn -B -q -DskipTests compile dependency:build-classpath -Dmdep.includeScope=runtime -Dmdep.outputFile=target/ubeod001.classpath` を実行する。Maven の出力はすべて **stderr** に回す（stdout はゴールデン比較の対象のため） |
 | JDK | `JAVA_HOME` があれば `$JAVA_HOME/bin/java`、なければ `java`。`java -version` が `1.8` でなければ stderr にメッセージを出して終了コード 2 |
 | 起動失敗 | ビルド失敗・JDK 不一致などは終了コード 2（`run-cobol.sh` の「2 = コンパイル失敗」と同じ）。RC の 0 / 8 / 12 とは重ならない |
 
-`batch/cobol/run.sh` との違い（意図したもの）:
+#### `batch/java/run.sh`
 
-- `RC=…` の行と `GOLDEN OK` の行は出さない。stdout をプログラムの出力だけにして、`golden_main` から呼んだときに stdout.txt を汚さないため。ゴールデン比較は `batch/golden/run-java.sh`（§3.3）が受け持つ。
-- `set -e` で RC≠0 のときに途中終了する問題（仕様書 E25）はない。終了コードは常にプログラムの RC。
-- 引数なしのときの既定入力（`data/ACCOUNTS.DAT`）はない。`batch/cobol/data/ACCOUNTS.DAT` はゴールデンの `baseline` ケースと同じ内容なので、`run-java.sh baseline` で代わりになる。
+```
+使い方: batch/java/run.sh [ACCOUNTS.DAT へのパス]      (既定: batch/golden/baseline/ACCOUNTS.DAT)
+出力  : batch/java/work/ACCRUED.DAT, batch/java/work/UBEOD001.LOG
+stdout: プログラムの出力 + "RC=<RC>" + "GOLDEN OK: …" / "GOLDEN MISMATCH: …"
+```
+
+```sh
+#!/bin/sh
+# set -e は使わない (RC=8・12 でも RC= と比較まで出す。仕様書 E25)
+JAVA_DIR=$(cd "$(dirname "$0")" && pwd)
+INPUT=${1:-$JAVA_DIR/../golden/baseline/ACCOUNTS.DAT}
+mkdir -p "$JAVA_DIR/work" && cp "$INPUT" "$JAVA_DIR/work/ACCOUNTS.DAT" || exit 2   # INPUT は呼び出し元のカレント基準
+cd "$JAVA_DIR/work" || exit 2
+rm -f ACCRUED.DAT UBEOD001.LOG
+"$JAVA_DIR/ubeod001.sh"; RC=$?
+[ "$RC" -eq 2 ] && exit 2                       # 起動失敗
+echo "RC=$RC"
+BASE=$JAVA_DIR/../golden/baseline
+if cmp -s ACCRUED.DAT "$BASE/ACCRUED.DAT"; then
+  echo "GOLDEN OK: ACCRUED.DAT matches golden/baseline/ACCRUED.DAT"
+else
+  echo "GOLDEN MISMATCH: ACCRUED.DAT differs from golden/baseline/ACCRUED.DAT"; diff ACCRUED.DAT "$BASE/ACCRUED.DAT"; exit 1
+fi
+exit $RC
+```
+
+- 既定の入力は `batch/golden/baseline/ACCOUNTS.DAT`（`batch/cobol/data/ACCOUNTS.DAT` と同じ内容）。p5 で `batch/cobol/` を消しても動くように、`batch/cobol/` を参照しない。比較相手も `batch/golden/baseline/ACCRUED.DAT`（`batch/cobol/expected/ACCRUED.DAT` と同じ内容）。
+- `batch/cobol/run.sh` と同じく、入力が baseline 以外のときも baseline の期待値と比べる（MISMATCH になるのは正しい動作。任意の入力の結果は `work/` を見る）。
+- `batch/cobol/run.sh` との違い（意図したもの）:
+  - `set -e` を使わない。COBOL 版は RC=8・12 のとき `RC=` の行も比較も出さずに終了する（仕様書 E25）。Java 版は RC=8・12 でも `RC=…` を出し、比較まで進む。
+  - 引数の相対パスは **呼び出し元のカレントディレクトリ基準**。COBOL 版は先に `cd` するので `batch/cobol/` 基準になる。
+  - 前回の `work/ACCRUED.DAT`・`UBEOD001.LOG` を消してから実行する（RC=12 のとき、前回の出力を今回の結果と取り違えない）。
+- 終了コード: 一致 → プログラムの RC（0 / 8 / 12）、不一致 → 1、起動失敗 → 2（COBOL 版と同じ）。
 
 `.gitignore` に `batch/java/work/` を追加する。
 
@@ -114,11 +151,11 @@ set -u
 GOLDEN_DIR=$(cd "$(dirname "$0")" && pwd)
 GOLDEN_WORK=${GOLDEN_WORK:-$GOLDEN_DIR/work-java}
 . "$GOLDEN_DIR/golden-lib.sh"
-"$GOLDEN_DIR/../java/run.sh" --build-only || exit 2     # 1 回だけビルド (ケースごとにはビルドしない)
-golden_main "$@" -- "$GOLDEN_DIR/../java/run.sh"
+"$GOLDEN_DIR/../java/ubeod001.sh" --build-only || exit 2     # 1 回だけビルド (ケースごとにはビルドしない)
+golden_main "$@" -- "$GOLDEN_DIR/../java/ubeod001.sh"
 ```
 
-- `run.sh --build-only` はビルドだけして終了する（§3.1 のビルド条件に関係なく必ず `mvn compile` を走らせ、古い class で比較しないようにする）。
+- 先に `ubeod001.sh --build-only` で 1 回だけビルドし、各ケースでは `ubeod001.sh` を引数なしで呼ぶ（§3.1）。
 - 作業ディレクトリは COBOL と分けて `batch/golden/work-java/`（`.gitignore` に追加）。COBOL と Java を続けて実行しても互いの結果を消さない。
 - `--update` は Java 版では使わない（期待値は COBOL の結果だけで作る、というゴールデンの方針のため）。`golden_main` の機能としては動くが、README に「Java 版で `--update` しない」と書く。
 - `batch/golden/README.md` の「Java 版での使い方（予定）」は `java -jar` の例になっているので、s2.2 で `run-java.sh` に書き換える。
@@ -234,7 +271,7 @@ run(dir, out)
 | `WS-TOTAL-BALANCE` | 9(17) | `of(17, 0)` | `store(total + balance)` | 上位桁を切捨て（E07、`total-balance-overflow`） |
 | `WS-TOTAL-ACCRUED` | 9(15)V9(02) | `of(15, 2)` | `store(total + 加算後の accrued)` | 上位桁を切捨て（E08、`total-accrued-overflow`） |
 | `WS-TOTAL-DAILY` | 9(15)V9(02) | `of(15, 2)` | `store(total + daily)` | 上位桁を切捨て |
-| `WS-TRL-COUNT`（入力） | 9(09) | `of(9, 0)` | `parse` → `WS-READ-COUNT` と `compareTo` | — |
+| `WS-TRL-COUNT`（入力） | 9(09) | `of(9, 0)` | 9 バイトが全部空白なら不一致（§7.2）。それ以外は `parse` → `WS-READ-COUNT` と `compareTo` | — |
 | `WS-TRL-COUNT` / `-BALANCE` / `-ACCRUED`（出力） | 9(09) / 9(17) / 9(15)V9(02) | `of(9,0)` / `of(17,0)` / `of(15,2)` | 集計値を `zoned` | 集計値は既に各 PIC に収まっている |
 | `WS-LOG-VALUE` | Z(16)9 | `editZ(v, 16, 0)` | LOG 2–5 行目 | あふれない（仕様書 §4.4） |
 | `WS-LOG-AMT-VALUE` | Z(14)9.99 | `editZ(v, 14, 2)` | LOG 6・7 行目 | あふれない（同上） |
@@ -342,14 +379,15 @@ RC=12 で止めたとき:
 | `DTL-BALANCE` | すべての D（残高合計に足すため） | — |
 | `DTL-RATE` | 利息対象の D（計算に使うため） | 対象外の D: 利率はバイトのまま出力される（**[実行確認 X08]**） |
 | `DTL-ACCRUED` | すべての D（対象外も未払利息合計に足すため） | — |
-| `TRL-COUNT` | T を読んだとき | — |
+| `TRL-COUNT` | T を読んだとき | 9 バイトが全部空白のとき: 件数不一致として扱う（下の説明） |
 
 - 1 つの D で複数の項目が数字以外のときは、COBOL が使う順（`DTL-BALANCE` → `DTL-RATE` → `DTL-ACCRUED`）で最初の 1 つを出す。
 - レコード番号 = 入力の何レコード目か（1 始まり、H・D・T・未知の区分・空行をすべて数える）。
 - 数字は `'0'`–`'9'`（0x30–0x39）だけ。空白・符号・小数点・全角数字は数字以外。
 - 仕様書の例との対応: E17 後半（29 バイトの D、状態 A・種目 1）→ 15 バイトの残高は数字、利率に空白が入るので `NOT NUMERIC DTL-RATE RECORD=000000003`。E18（残高が空白）→ `NOT NUMERIC DTL-BALANCE RECORD=000000002`。
-- 入力のトレーラが `T` だけ（件数が空白）の場合、COBOL は件数不一致（`IN=` の後が空白）で RC=8 になる（**[実行確認 X09]**）が、Java 版は `NOT NUMERIC TRL-COUNT` で RC=12 にする。空白以外の数字以外では比較結果が GnuCOBOL 依存になるので、「数値項目は数字だけ」の規則にそろえる。
-- これらはゴールデン（COBOL が正）には入れない。s3.3 の JUnit で Java 版の期待値として確かめる（§10）。
+- **トレーラの件数（`TRL-COUNT`）が 9 バイトとも空白** のときは COBOL と同じにする: `UBEOD001E TRAILER COUNT MISMATCH IN=<空白 9 バイト> READ=<9 桁>` を出し、RC=8 で続行し、トレーラは再集計値で出力する。COBOL で再現できる（**[実行確認 X09]**）ので RC=12 にはしない。`T` だけのトレーラ（2 バイト目以降が空白）もこれに当たる。ゴールデンに `trailer-count-blank` を追加する（s2.2）。
+- `TRL-COUNT` に空白以外の数字以外が入っている（空白と数字が混ざっている場合を含む）ときだけ `NOT NUMERIC TRL-COUNT` で RC=12。比較の結果が GnuCOBOL の内部実装に依存するため。
+- `NOT NUMERIC` と NUL のケースはゴールデン（COBOL が正）には入れない。s3.3 の JUnit で Java 版の期待値として確かめる（§10）。
 
 ---
 
@@ -361,7 +399,7 @@ RC=12 で止めたとき:
 | 2 | 数値項目に数字以外 | RC=12、`UBEOD001E NOT NUMERIC <項目> RECORD=<9 桁>`、出力なし。COBOL が数値として使う項目だけを検査 | §7.2 |
 | 3 | ASCII 以外のバイト | バイト単位で処理する（エラーにしない）。MS932 の 2 バイト文字も COBOL と同じ出力。ゴールデンに `ms932-dbcs` を追加 | §4.3 |
 | 4 | 出力ファイルの OPEN・WRITE エラー | RC=12、`UBEOD001E <ファイル名> WRITE ERROR 30` | §7.2 |
-| 5 | ファイル名・作業ディレクトリ | COBOL と同じくカレントの固定ファイル名。プログラムの引数では変えない（`run.sh` の引数は `batch/cobol/run.sh` と同じ「入力ファイルを work/ にコピー」） | §3.1 |
+| 5 | ファイル名・作業ディレクトリ | COBOL と同じくカレントの固定ファイル名。プログラムの引数では変えない（`run.sh` の引数は `batch/cobol/run.sh` と同じ「入力ファイルを work/ にコピー」。`ubeod001.sh` は引数を取らない） | §3.1 |
 
 ---
 
@@ -369,7 +407,7 @@ RC=12 で止めたとき:
 
 | 仕様書 | 内容 | 設計での扱い | 確かめ方（ゴールデン / JUnit） |
 |---|---|---|---|
-| §1 概要 | 入力・出力・stdout・RC、固定ファイル名、`run.sh` | §1、§3.1 | 全ケース |
+| §1 概要 | 入力・出力・stdout・RC、固定ファイル名、`run.sh` | §1、§3.1（`ubeod001.sh`・`run.sh`） | 全ケース、`run.sh` で baseline |
 | §1.1 処理の流れ | OPEN → READ ループ → CLOSE、並び順を検査しない、ヘッダ・トレーラなし、空ファイル | §3.4 | `no-header`・`no-trailer`・`records-after-trailer`・`empty-file`・`header-trailer-only` |
 | §2.1 レイアウト（H/D/T） | 桁位置、PIC | §4.4 `Field`、§5.2 | `baseline` |
 | §2.1 FILLER の引き継ぎ | H は入力のまま、T の 45–52 桁は入力のまま | §4.4 | `filler-passthrough` |
@@ -382,9 +420,9 @@ RC=12 で止めたとき:
 | §4.3 集計 | カウンタ・合計、ヘッダで戻さない、加算後の未払利息を合計 | §3.4、§5.2 | `records-after-trailer`・`baseline` |
 | §4.4 桁あふれ | 上位桁の切捨て、RC=0 | §5.3 | `max-digits`・`accrued-near-overflow`・`accrued-overflow`・`total-balance-overflow`・`total-accrued-overflow` |
 | §4.5 数値項目に数字以外 | 再現の対象にしない | §7.2（RC=12） | JUnit（Java 版の期待値） |
-| §5 トレーラ処理 | 件数だけ照合、再集計値で出力、不一致は RC=8 で続行 | §4.4、§7.1 | `trailer-count-mismatch` |
+| §5 トレーラ処理 | 件数だけ照合、再集計値で出力、不一致は RC=8 で続行 | §4.4、§7.1、§7.2（件数が空白） | `trailer-count-mismatch`、`trailer-count-blank`（追加） |
 | §6.1 終了コード | 0 / 8 / 12、8 は戻らない、12 は出力なし | §7.1 | `unknown-record-kind`・`trailer-count-mismatch`・`no-input` |
-| §6.1 `run.sh` の `set -e` | RC≠0 で比較まで進まない | §3.1（Java 版 `run.sh` にはない） | — |
+| §6.1 `run.sh` の `set -e` | RC≠0 で比較まで進まない | §3.1（Java 版 `run.sh` は `set -e` を使わず、RC=8・12 でも `RC=` と比較を出す） | `run.sh` に RC=8 の入力 |
 | §6.2 DISPLAY | 文言・9 桁ゼロ埋め・stdout | §7.1 | 全ケースの stdout.txt |
 | §7.1 既存 Java との対応 | `dailyInterest` 共有、`bearsInterest` は使わない、`BatchFileService` は変更しない | §2、§6 | 既存 39 テスト + 全ケース |
 | §7.2-1 末尾空白 | COBOL（埋めない側）に合わせる | §4.2 | 全ケース |
@@ -407,7 +445,7 @@ RC=12 で止めたとき:
 | §9 E21・E22 | FILLER・種目/状態 | §4.4、§6 | `filler-passthrough`・`type-status-codes` |
 | §9 E23 | MS932 の 2 バイト文字 | §4.3 | `ms932-dbcs`（追加） |
 | §9 E24 | DISPLAY は stdout、stderr なし | §7.1 | 全ケース（golden-lib.sh が stderr を参考表示） |
-| §9 E25 | `run.sh` に RC=8 の入力 | §3.1 | — |
+| §9 E25 | `run.sh` に RC=8 の入力 | §3.1（直す） | `batch/java/run.sh batch/golden/unknown-record-kind/ACCOUNTS.DAT` で `RC=8` と `GOLDEN MISMATCH` が出る |
 
 ---
 
@@ -415,25 +453,25 @@ RC=12 で止めたとき:
 
 | ステップ | この設計から引き継ぐこと |
 |---|---|
-| s2.2 新旧比較ハーネス | `batch/golden/run-java.sh`（§3.3）。`batch/java/run.sh` は先に「`--build-only` とカレントで実行」だけの形で作り、Java 版本体ができるまでは全ケース NG になることを確認する。ゴールデンに `ms932-dbcs`（E23）を COBOL の `--update` で追加。`.gitignore` に `batch/golden/work-java/` と `batch/java/work/`。`batch/golden/README.md` の Java 版の使い方を書き換え |
+| s2.2 新旧比較ハーネス | `batch/golden/run-java.sh`（§3.3）と `batch/java/ubeod001.sh`（§3.1）。Java 版本体ができるまでは全ケース NG になることを確認する。ゴールデンに `ms932-dbcs`（E23）と `trailer-count-blank`（X09）を COBOL の `--update` で追加。`.gitignore` に `batch/golden/work-java/` と `batch/java/work/`。`batch/golden/README.md` の Java 版の使い方を書き換え |
 | s3.1 固定長レコード I/O と数値編集 | `LineSequentialFile`・`HostRecord`・`Field`・`Pic`（§4・§5）と単体テスト。`Pic.store` は §12 X05 の値を、`LineSequentialFile` は §4.1 の表（X01–X04 を含む）をテストケースにする |
-| s3.2 本体ロジック | `Ubeod001`・`Ubeod001Log`・`Ubeod001Abend`、`InterestService` の 3 引数版（§6）、`run.sh` の引数ありモード。`run-java.sh` で全ケース OK |
-| s3.3 JUnit 組込み | `Ubeod001` の `run(dir, out)` で全ゴールデンを回す JUnit（名前は `*Test` か `*IT` にして surefire の対象にする）。§7.2 の Java 版だけのエラー（E17 後半・E18・NUL・入力がディレクトリ・出力不可・`T` だけのトレーラ）は、期待する stdout・RC・出力なしを JUnit に直接書く。Jenkinsfile に Java 版のゴールデン比較を追加 |
+| s3.2 本体ロジック | `Ubeod001`・`Ubeod001Log`・`Ubeod001Abend`、`InterestService` の 3 引数版（§6）、`batch/java/run.sh`（§3.1）。`run-java.sh` で全ケース OK |
+| s3.3 JUnit 組込み | `Ubeod001` の `run(dir, out)` で全ゴールデンを回す JUnit（名前は `*Test` か `*IT` にして surefire の対象にする）。§7.2 の Java 版だけのエラー（E17 後半・E18・NUL・入力がディレクトリ・出力不可・空白以外の数字以外が入ったトレーラ件数）は、期待する stdout・RC・出力なしを JUnit に直接書く。Jenkinsfile に Java 版のゴールデン比較を追加 |
 
 ---
 
 ## 11. COBOL と Java 版で結果が違うもの（意図したもの）
 
-ゴールデンの 24 ケース（+ `ms932-dbcs`）では違いはない。違うのは次の、COBOL の結果が再現できない・意味をなさない場合だけ。
+ゴールデンの 24 ケース（+ `ms932-dbcs`・`trailer-count-blank`）では違いはない。違うのは次の、COBOL の結果が再現できない・意味をなさない場合だけ。
 
 | 入力・状況 | COBOL | Java 版 |
 |---|---|---|
 | 数値項目に数字以外（E17 後半・E18） | 意味のない値で RC=0 | RC=12、`NOT NUMERIC`、出力なし |
-| トレーラが `T` だけ（件数が空白） | `IN=` が空白の件数不一致、RC=8 | RC=12、`NOT NUMERIC TRL-COUNT` |
+| トレーラ件数に空白以外の数字以外（例: `00000000A`） | 比較結果が GnuCOBOL 依存 | RC=12、`NOT NUMERIC TRL-COUNT` |
 | 入力に NUL | 桁がずれた値で RC=0 | RC=12、`NUL BYTE` |
 | ACCOUNTS.DAT がディレクトリ | 空ファイル扱いで RC=0 | RC=12、`OPEN ERROR 30` |
 | 出力ファイルが作れない | 出力なしで RC=0 | RC=12、`WRITE ERROR 30` |
-| `run.sh` の stdout | `RC=…`・`GOLDEN OK` の行あり、RC≠0 で途中終了 | プログラムの出力だけ。終了コード = RC |
+| `run.sh` | RC=8・12 で `RC=` も比較も出さずに終了（`set -e`）。既定の入力と期待値は `batch/cobol/data`・`expected`。引数の相対パスは `batch/cobol/` 基準 | RC=8・12 でも `RC=…` と `GOLDEN OK`/`MISMATCH` を出す。既定の入力と期待値は `batch/golden/baseline/`。引数の相対パスは呼び出し元基準 |
 
 ---
 

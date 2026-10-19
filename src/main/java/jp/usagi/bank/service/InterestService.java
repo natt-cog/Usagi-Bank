@@ -2,6 +2,7 @@ package jp.usagi.bank.service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ import jp.usagi.bank.repository.AccountRepository;
  *   対象科目: 普通・貯蓄・定期. 当座は無利息.
  * </pre>
  *
- * ホスト側 COBOL バッチ (cobol/INTCALC.cbl) と計算結果が一致しなければならない.
+ * ホスト側 COBOL バッチ (batch/cobol/UBEOD001.cbl) と計算結果が一致しなければならない.
  */
 @Service
 public class InterestService {
@@ -50,11 +51,21 @@ public class InterestService {
 
     /** 1日分の利息. 銭未満切捨. */
     public static BigDecimal dailyInterest(BigDecimal balance, BigDecimal annualRatePercent) {
+        return dailyInterest(balance, annualRatePercent, UnaryOperator.identity());
+    }
+
+    /**
+     * 1日分の利息. 銭未満切捨.
+     *
+     * @param work 残高×年利÷100 (小数10桁切捨) を受け取る中間項目の格納規則
+     *             (COBOL の WS-WORK PIC 9(15)V9(10) の上位桁切捨てを差し込む)
+     */
+    public static BigDecimal dailyInterest(BigDecimal balance, BigDecimal annualRatePercent,
+            UnaryOperator<BigDecimal> work) {
         if (balance.signum() <= 0) {
             return BigDecimal.ZERO.setScale(2);
         }
-        return balance.multiply(annualRatePercent)
-                .divide(HUNDRED, 10, BigDecimal.ROUND_DOWN)
+        return work.apply(balance.multiply(annualRatePercent).divide(HUNDRED, 10, BigDecimal.ROUND_DOWN))
                 .divide(DAYS_IN_YEAR, 2, BigDecimal.ROUND_DOWN);
     }
 

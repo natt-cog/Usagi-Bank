@@ -58,6 +58,7 @@ curl -u admin:admin123 -o ACCOUNTS.DAT http://localhost:8080/usagi/api/batch/acc
 ```bash
 JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 mvn test        # 39 件 (JUnit 4, SpringRunner, H2 Oracle モード)
 cd batch/cobol && ./run.sh                                     # UBEOD001 をコンパイル・実行し expected/ACCRUED.DAT と比較
+batch/golden/run-cobol.sh                                      # UBEOD001 ゴールデンセット 24 ケース (境界・異常系) を COBOL で実行して比較
 ```
 
 | テスト | 検証内容 |
@@ -89,6 +90,7 @@ src/main/java/jp/usagi/bank/
 src/main/resources/db/migration  Flyway 4: V1 スキーマ (Oracle DDL 方言), V2 初期データ (5 支店, 10 顧客, 15 口座)
 src/main/webapp/WEB-INF/jsp      JSP/JSTL 画面 (日本語 UI) + jQuery 1.12.4
 batch/cobol/UBEOD001.cbl         COBOL 日次利息積数バッチ (GnuCOBOL), data/, expected/, run.sh
+batch/golden/                    UBEOD001 ゴールデンセット (ケースごとの入力・期待値, run-cobol.sh)。手順は batch/golden/README.md
 docs/images/                     README 用スクリーンショット / GIF
 ```
 

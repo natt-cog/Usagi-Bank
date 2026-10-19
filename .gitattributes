@@ -1,0 +1,4 @@
+# UBEOD001 ゴールデンはバイト比較するので改行変換しない (crlf-input・no-final-newline ケースを含む)
+batch/golden/** -text
+batch/cobol/data/** -text
+batch/cobol/expected/** -text

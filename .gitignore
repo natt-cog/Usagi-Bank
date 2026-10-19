@@ -20,3 +20,7 @@ batch/cobol/work/
 # OS
 .DS_Store
 Thumbs.db
+
+# UBEOD001 ゴールデンテスト work dir (期待値の UBEOD001.LOG は *.log に掛からないよう明示)
+batch/golden/work/
+!batch/golden/*/UBEOD001.LOG

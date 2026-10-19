@@ -177,6 +177,7 @@ run(dir, out)
 ```
 
 - 出力は一時ファイル（`ACCRUED.DAT.tmp`、`UBEOD001.LOG.tmp`）に書き、正常に閉じたあと `Files.move(…, REPLACE_EXISTING, ATOMIC_MOVE)` で置き換える。RC=12 で止めたときに **途中までの ACCRUED.DAT を残さない** ため（後続の `POST /api/batch/accrued-file` に半端なファイルが渡らないようにする）。RC=12 のとき既存の ACCRUED.DAT・LOG には触らない（COBOL の OPEN エラー時と同じ）。
+- 置き換えは ACCRUED.DAT → UBEOD001.LOG の順。UBEOD001.LOG の置き換えに失敗したとき（`UBEOD001E UBEOD001.LOG WRITE ERROR 30`）は、置き換え済みの ACCRUED.DAT を消してから RC=12 にする（LOG のない ACCRUED.DAT を後続に渡さない）。この場合だけは前回の ACCRUED.DAT も残らない。s3.3 の JUnit（`Ubeod001Test.logNotReplaceable`）で確認。
 - 入力の並び順は検査しない（仕様書 §1.1）。ヘッダ・トレーラがなくても、2 回目のヘッダやトレーラの後のレコードがあっても、COBOL と同じく出現順に処理する。
 - カウンタはヘッダで 0 に戻さない（仕様書 §4.3、E16）。
 

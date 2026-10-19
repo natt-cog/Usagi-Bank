@@ -201,7 +201,12 @@ public final class Ubeod001 {
         outFile.close();
         logFile.close();
         outFile.commit();
-        logFile.commit();
+        try {
+            logFile.commit();
+        } catch (Ubeod001Abend e) {
+            outFile.uncommit();
+            throw e;
+        }
         display("UBEOD001I COMPLETED. READ=" + COUNT.zoned(readCount)
                 + " ACCRUED=" + COUNT.zoned(accruedCount)
                 + " SKIPPED=" + COUNT.zoned(skippedCount));
@@ -275,6 +280,15 @@ public final class Ubeod001 {
                 Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             } catch (IOException e) {
                 throw writeError(e);
+            }
+        }
+
+        /** commit した本来のファイルを消す (後のファイルの commit に失敗したとき, 片方だけ残さない). */
+        void uncommit() {
+            try {
+                Files.deleteIfExists(target);
+            } catch (IOException e) {
+                // 消せなければ残る. RC=12 とメッセージで異常は伝わる
             }
         }
 

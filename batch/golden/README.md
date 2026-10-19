@@ -8,14 +8,18 @@ Java 版 UBEOD001 も同じケース・同じ比較処理（`golden-lib.sh`）�
 ```
 batch/golden/
   run-cobol.sh        全ケースを COBOL で実行し、期待値とバイト比較する
-  golden-lib.sh       比較処理の本体（COBOL 版・Java 版で共用）
+  run-java.sh         全ケースを Java 版（batch/java/ubeod001.sh）で実行し、期待値とバイト比較する
+  compare.sh          新旧比較ハーネス: COBOL 版と Java 版を同じ入力で実行し、ケースごとの一致 / 不一致を表で出す
+  golden-lib.sh       比較処理の本体（run-cobol.sh・run-java.sh・compare.sh で共用）
   <ケース名>/
     ACCOUNTS.DAT      入力（ないケース = 入力ファイルなし）
     ACCRUED.DAT       期待値: 出力ファイル（ない = 作られないことが期待値）
     UBEOD001.LOG      期待値: 処理件数レポート（同上）
     stdout.txt        期待値: 標準出力（DISPLAY メッセージ）
     rc.txt            期待値: 終了コード
-  work/               実行時の作業ディレクトリ（git 管理外）
+  work/               run-cobol.sh の作業ディレクトリ（git 管理外）
+  work-java/          run-java.sh の作業ディレクトリ（git 管理外）
+  work-compare/       compare.sh の作業ディレクトリ（git 管理外）
 ```
 
 比較の対象は仕様書 §8 の「バイト一致が必要な範囲」である ACCRUED.DAT・UBEOD001.LOG・stdout・終了コードの 4 つ。stderr は比較しない（出力があれば参考として表示する）。
@@ -34,7 +38,7 @@ OK   accrued-near-overflow (RC=0)
 ...
 OK   unknown-record-kind (RC=8)
 ----
-結果: OK=24 NG=0 (全 24 ケース)
+結果: OK=26 NG=0 (全 26 ケース)
 ```
 
 終了コードは 0 = 全ケース一致、1 = 不一致あり、2 = コンパイル失敗。不一致のときは、どのファイルがどう違うかを `cat -A` 表示の diff で出す（左が期待値、右が実行結果）。
@@ -75,6 +79,7 @@ OK   unknown-record-kind (RC=8)
 | `total-balance-overflow` | 残高 999999999999999 × 101 件 | 0 | 残高合計 9(17) の桁あふれ | E07 |
 | `total-accrued-overflow` | 未払利息 999999999999999.99 × 2 件 | 0 | 未払利息合計 9(15)V9(2) の桁あふれ | E08 |
 | `trailer-count-mismatch` | 明細 2 件、トレーラ件数 5 | 8 | 続行して再集計値のトレーラを出力 | E09 |
+| `trailer-count-blank` | 明細 2 件、トレーラは `T` のあと全部空白（件数が空白 9 バイト） | 8 | `IN=` のあとが空白 9 バイトの MISMATCH、続行して再集計値のトレーラを出力 | 設計メモ X09 |
 | `unknown-record-kind` | 区分 `X` の行 | 8 | その行は出力せず件数にも入れない | E10 |
 | `blank-line` | 空行 | 8 | 区分が空白 → 未知の区分扱い | E11 |
 | `header-trailer-only` | ヘッダとトレーラだけ | 0 | 件数・合計 0 のトレーラ | §5 |
@@ -88,23 +93,60 @@ OK   unknown-record-kind (RC=8)
 | `crlf-input` | CRLF 改行 | 0 | LF と同じ出力 | E19 |
 | `no-final-newline` | 最終行に改行なし | 0 | LF と同じ出力 | E20 |
 | `long-record` | 52 桁を超える明細 | 0 | 53 桁目以降を捨てる | E17 |
+| `ms932-dbcs` | 口座番号に MS932 の 2 バイト文字（`ア` = 0x83 0x41） | 0 | バイト単位で桁を切り、2 バイト文字はそのまま出力。利息も通常どおり | E23 |
 
 ### 入れていないもの
 
 次の挙動は再現の対象にしない、または移植方針が未定なのでケースにしていない。
 
 - 数値項目に数字以外が入る入力（52 桁未満の明細、残高が空白など。仕様書 E17 後半・E18）: 出力値が GnuCOBOL の内部実装に依存する（仕様書 §4.5）。
-- ASCII 以外のバイト（MS932 の 2 バイト文字。仕様書 E23）: バイト単位で処理するかエラーにするかが未定（仕様書 §8 #3）。
 - 出力ファイルの OPEN・WRITE エラー: COBOL が判定していない（仕様書 §8 #4）。
 
-## Java 版での使い方（予定）
+## Java 版での使い方
 
-`golden-lib.sh` の `golden_main` に実行コマンドを渡せば、同じケースを同じ手順で比較できる。
+Java 版 UBEOD001 の起動コマンドは `batch/java/ubeod001.sh`（設計メモ [§3.1](../../docs/migration/UBEOD001-java-design.md)）。COBOL の実行ファイルと同じく、カレントの `ACCOUNTS.DAT` を読み、`ACCRUED.DAT`・`UBEOD001.LOG` を書き、stdout にメッセージだけを出し、終了コード = RC。ビルド失敗・JDK 8 以外・未実装は終了コード 2。JDK 8 と Maven が必要。
 
 ```bash
-. batch/golden/golden-lib.sh
-GOLDEN_DIR=batch/golden GOLDEN_WORK=batch/golden/work-java \
-  golden_main "$@" -- java -jar /path/to/ubeod001.jar
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+batch/golden/run-java.sh                        # 全ケース (Java 版 ↔ 期待値)
+batch/golden/run-java.sh baseline no-input      # 指定したケースだけ
 ```
 
-コマンドは作業ディレクトリをカレントにして実行されるので、COBOL と同じくカレントの `ACCOUNTS.DAT` を読み、`ACCRUED.DAT`・`UBEOD001.LOG` を書き、stdout にメッセージを出し、終了コードを返すこと。
+- 最初に `ubeod001.sh --build-only` で 1 回だけ `mvn compile` し、各ケースでは `ubeod001.sh` を引数なしで呼ぶ。
+- 作業ディレクトリは `work-java/`。COBOL（`work/`）と続けて実行しても互いの結果を消さない。
+- **Java 版で `--update` しない。** 期待値は COBOL の実行結果だけで作る。
+- Java 版本体（`src/main/java/jp/usagi/bank/batch/host/Ubeod001.java`）ができるまでは、全ケース NG（RC=2、stderr に「未実装」）になる。
+
+## 新旧比較ハーネス（compare.sh）
+
+COBOL 版と Java 版を同じ入力で実行し、ケースごとに次の 3 つを比べて表（Markdown）で出す。比較は `golden-lib.sh` の `golden_compare_case`（ACCRUED.DAT・UBEOD001.LOG・stdout・RC のバイト比較）をそのまま使う。
+
+| 列 | 比べるもの |
+|---|---|
+| COBOL ↔ 期待値 | COBOL 版の実行結果と、このディレクトリの期待値 |
+| Java ↔ 期待値 | Java 版の実行結果と、このディレクトリの期待値 |
+| 新旧 (Java ↔ COBOL) | Java 版の実行結果と、同じ実行で得た COBOL 版の実行結果 |
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+batch/golden/compare.sh                         # 全ケース
+batch/golden/compare.sh baseline ms932-dbcs     # 指定したケースだけ
+batch/golden/compare.sh --require-java          # Java 版が未実装なら終了コード 3 (p3・Jenkins ではこれを使う)
+```
+
+```
+| ケース | 期待 RC | COBOL RC | COBOL ↔ 期待値 | Java RC | Java ↔ 期待値 | 新旧 (Java ↔ COBOL) |
+|---|---|---|---|---|---|---|
+| `accrued-near-overflow` | 0 | 0 | 一致 | - | 未実装 | 未実装 |
+...
+----
+COBOL ↔ 期待値: 一致=26 不一致=0 (全 26 ケース)
+Java          : 未実装 (src/main/java/jp/usagi/bank/batch/host/Ubeod001.java がない。COBOL ↔ 期待値だけで判定)
+```
+
+- 終了コード: 0 = 不一致なし、1 = 1 件でも不一致あり、2 = コンパイル・ビルド失敗など、3 = `--require-java` を付けたのに Java 版が未実装（不一致があれば 1 を優先）。不一致があれば表のあとに `cat -A` 表示の diff を出す（新旧の diff は左が COBOL、右が Java）。
+- Java 版本体がまだないときは Java・新旧の列を「未実装」とし、COBOL ↔ 期待値だけで判定する（全ケース一致なら終了コード 0）。**p3 の各ステップと Jenkins では `--require-java` を付ける**。付けると、Java の列に「未実装」があれば終了コード 3 になる（「未実装」のまま合格扱いにしない）。
+- COBOL 版は `batch/cobol/run.sh` ではなく、`run-cobol.sh` と同じく `cobc` でビルドした実行ファイルを直接呼ぶ。`run.sh` は `set -e` のため RC≠0（RC=8・12）のケースで比較まで進まないため（仕様書 E25）。
+- `cobc`（GnuCOBOL）が必要。COBOL を消すフェーズ（p5）以降は `run-java.sh` を使う。
+- 作業ディレクトリは `work-compare/cobol/<ケース名>/`・`work-compare/java/<ケース名>/`。実行のたびに作り直す。
+- `--update` は受け付けない（期待値は `run-cobol.sh --update` で作る）。

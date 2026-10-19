@@ -2,7 +2,7 @@
 
 対象: `batch/cobol/UBEOD001.cbl` を Java 8 に移植した Java 版 UBEOD001
 前提資料: [UBEOD001-spec.md](UBEOD001-spec.md)（以下「仕様書」）、[batch/golden/README.md](../../batch/golden/README.md)（以下「ゴールデン」）
-合格基準: ゴールデン 24 ケースで、ACCRUED.DAT・UBEOD001.LOG・stdout・終了コードが COBOL と **バイト一致** すること
+合格基準: ゴールデン 26 ケース（s1.2 の 24 ケース + s2.2 で追加した `ms932-dbcs`・`trailer-count-blank`）で、ACCRUED.DAT・UBEOD001.LOG・stdout・終了コードが COBOL と **バイト一致** すること
 
 > 本書は設計だけを決める。コードは後続のステップ（s3.1 固定長レコード I/O と数値編集、s3.2 本体ロジック、s3.3 JUnit 組込み）で書く。
 > **[実行確認]** は、この設計のために追加で COBOL を動かして確かめた項目。記録は §12。

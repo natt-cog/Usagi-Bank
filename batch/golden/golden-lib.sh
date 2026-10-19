@@ -19,7 +19,10 @@ golden_cases() {
   local d
   for d in "$GOLDEN_DIR"/*/; do
     d=$(basename "$d")
-    [ "$d" = work ] || echo "$d"
+    case $d in
+      work|work-*) ;;            # 作業ディレクトリ (work/・work-java/・work-compare/)
+      *) echo "$d" ;;
+    esac
   done
 }
 

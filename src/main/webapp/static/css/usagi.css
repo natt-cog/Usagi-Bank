@@ -58,3 +58,39 @@ body.login { background: #0b4f8a; }
 .login-box input { width: 100%; box-sizing: border-box; }
 .login-box button { width: 100%; margin-top: 8px; }
 .hint { font-size: 11px; color: #888; text-align: center; }
+#theme-toggle { margin-right: 12px; }
+.login-theme { text-align: right; padding: 8px 16px; }
+
+/* ダークモード (body.dark) */
+body.dark { color: #d6dde5; background: #14181d; }
+body.dark a { color: #7fb8ec; }
+body.dark #header { background: #0a2f52; }
+body.dark #header .brand a { color: #e6edf3; }
+body.dark #nav { background: #1f262e; border-bottom-color: #36414d; }
+body.dark #footer { color: #8a96a3; }
+body.dark h1 { border-left-color: #3d8bd4; }
+body.dark h1 small, body.dark h2 small, body.dark .kana, body.dark .note { color: #9aa6b2; }
+body.dark .panel { background: #1c2229; border-color: #36414d; }
+body.dark table.grid th, body.dark table.grid td, body.dark table.kv th, body.dark table.kv td { border-color: #36414d; }
+body.dark table.grid th, body.dark table.kv th { background: #252d36; }
+body.dark table.grid tr:nth-child(even) td { background: #20272f; }
+body.dark table.grid td.empty { color: #8a96a3; }
+body.dark .flash.ok { background: #16301f; border-color: #3f7d50; color: #8fd6a3; }
+body.dark .flash.ng { background: #3a1a18; border-color: #a04a44; color: #f2a39c; }
+body.dark .inline-form { border-bottom-color: #36414d; }
+body.dark button, body.dark a.button { background: #2a333d; border-color: #55636f; color: #d6dde5; }
+body.dark button.primary { background: #1f6fb8; border-color: #175a96; color: #fff; }
+body.dark button.warn { background: #b23a2e; border-color: #8f2d23; color: #fff; }
+body.dark button.link { background: none; border: none; color: #ffd966; }
+body.dark input[type=text], body.dark input[type=password], body.dark select { background: #10141a; border-color: #55636f; color: #e6edf3; }
+body.dark fieldset { border-color: #36414d; }
+body.dark .lookup { color: #7fb8ec; }
+body.dark .req { color: #f08a7e; }
+body.dark .err { color: #f2a39c; }
+body.dark .status-FROZEN td, body.dark td.status-FROZEN, body.dark .kyc-PENDING { color: #e0a64a; }
+body.dark .status-CLOSED td, body.dark td.status-CLOSED { color: #77828d; }
+body.dark .kyc-REJECTED { color: #f2a39c; }
+body.dark .kyc-VERIFIED { color: #8fd6a3; }
+body.dark.login { background: #0a1b2c; }
+body.dark .login-box { background: #1c2229; border-color: #36414d; }
+body.dark .hint { color: #8a96a3; }

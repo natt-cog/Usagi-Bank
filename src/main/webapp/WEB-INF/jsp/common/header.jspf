@@ -16,9 +16,12 @@
 <script src="${ctx}/static/js/usagi.js"></script>
 </head>
 <body>
+<%@ include file="theme-init.jspf" %>
 <div id="header">
   <div class="brand"><a href="${ctx}/dashboard">うさぎ銀行 勘定系オンライン</a><span class="env">【検証環境】</span></div>
   <div class="user">
+    <button type="button" id="theme-toggle" class="link" onclick="return usagiToggleTheme();">ダークモード</button>
+    <script>usagiApplyTheme();</script>
     <sec:authorize access="isAuthenticated()">
       <sec:authentication property="name" /> 様
       (<sec:authentication property="authorities" />)

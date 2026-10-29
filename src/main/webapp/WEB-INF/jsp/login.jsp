@@ -9,6 +9,8 @@
 <link rel="stylesheet" href="${ctx}/static/css/usagi.css">
 </head>
 <body class="login">
+<%@ include file="common/theme-init.jspf" %>
+<div class="login-theme"><button type="button" id="theme-toggle" class="link" onclick="return usagiToggleTheme();">ダークモード</button><script>usagiApplyTheme();</script></div>
 <div class="login-box">
   <h1>うさぎ銀行<br><small>勘定系オンライン 端末ログイン</small></h1>
   <c:if test="${param.error != null}"><div class="flash ng">ユーザIDまたはパスワードが正しくありません</div></c:if>

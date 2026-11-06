@@ -1,0 +1,43 @@
+<%@ page pageEncoding="UTF-8" %>
+<script>
+/* 表示テーマ (ライト/ダーク) 切替。<body> 直後で実行し、描画前に body.dark を付けてちらつきを防ぐ */
+(function (w, d) {
+    var KEY = 'usagi.theme', body = d.body, mq = null;
+    function saved() { try { return w.localStorage.getItem(KEY); } catch (e) { return null; } }
+    function save(v) { try { w.localStorage.setItem(KEY, v); } catch (e) { /* 保存不可の端末はセッション内のみ */ } }
+    function isDark() { return /(^|\s)dark(\s|$)/.test(body.className); }
+    function label() {
+        var b = d.getElementById('theme-toggle'), dark = isDark();
+        if (!b) { return; }
+        b.innerHTML = dark ? 'ライト表示' : 'ダーク表示';
+        b.setAttribute('aria-label', dark ? '現在はダーク表示です。ライト表示に切り替えます' : '現在はライト表示です。ダーク表示に切り替えます');
+        b.setAttribute('title', b.getAttribute('aria-label'));
+    }
+    function apply(dark) {
+        var c = body.className.replace(/(^|\s)dark(\s|$)/g, ' ').replace(/^\s+|\s+$/g, '');
+        body.className = dark ? (c ? c + ' dark' : 'dark') : c;
+        label();
+    }
+    function on(el, ev, fn) { if (el.addEventListener) { el.addEventListener(ev, fn, false); } else if (el.attachEvent) { el.attachEvent('on' + ev, fn); } }
+
+    if (w.matchMedia) { mq = w.matchMedia('(prefers-color-scheme: dark)'); }
+    var s = saved();
+    apply(s ? s === 'dark' : !!(mq && mq.matches));
+
+    if (mq) {
+        var follow = function (e) { if (!saved()) { apply(e.matches); } };
+        if (mq.addEventListener) { mq.addEventListener('change', follow); } else if (mq.addListener) { mq.addListener(follow); }
+    }
+    on(d, 'click', function (e) {
+        var t = (e || w.event).target || (e || w.event).srcElement;
+        if (t && t.id === 'theme-toggle') {
+            var dark = !isDark();
+            save(dark ? 'dark' : 'light');
+            apply(dark);
+        }
+    });
+    if (d.readyState === 'complete' || d.readyState === 'interactive') { label(); }
+    on(d, 'DOMContentLoaded', label);
+    on(d, 'readystatechange', label);
+})(window, document);
+</script>

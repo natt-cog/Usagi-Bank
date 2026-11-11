@@ -1,20 +1,20 @@
 package jp.usagi.bank.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import jp.usagi.bank.domain.Account;
@@ -24,7 +24,6 @@ import jp.usagi.bank.repository.TransactionRepository;
 import jp.usagi.bank.service.TransferService.TransferResult;
 
 /** 振込業務ロジックの結合テスト (H2 Oracle モード). */
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
@@ -39,12 +38,12 @@ public class TransferServiceIT {
     @Autowired
     private BusinessDateService businessDateService;
 
-    @Before
+    @BeforeEach
     public void fixBusinessDate() {
-        businessDateService.override(new org.joda.time.LocalDate(2018, 3, 15));
+        businessDateService.override(LocalDate.of(2018, 3, 15));
     }
 
-    @After
+    @AfterEach
     public void clear() {
         businessDateService.clearOverride();
     }
@@ -93,26 +92,34 @@ public class TransferServiceIT {
         assertEquals(BigDecimal.ZERO, r.getFeeAmount());
     }
 
-    @Test(expected = InsufficientFundsException.class)
+    @Test
     public void insufficientFundsIncludesFee() {
-        // 1000003 の残高は 45,200 円. 45,000 円 + 手数料 220 円 > 残高
-        transferService.transfer("001", "1000003", "002", "2000001", new BigDecimal("45000"), null, "teller");
+        assertThrows(InsufficientFundsException.class, () -> {
+            // 1000003 の残高は 45,200 円. 45,000 円 + 手数料 220 円 > 残高
+            transferService.transfer("001", "1000003", "002", "2000001", new BigDecimal("45000"), null, "teller");
+        });
     }
 
-    @Test(expected = TransferLimitExceededException.class)
+    @Test
     public void dailyLimitIsCumulative() {
-        transferService.transfer("005", "5000001", "001", "1000001", new BigDecimal("600000"), null, "teller");
-        transferService.transfer("005", "5000001", "001", "1000001", new BigDecimal("400001"), null, "teller");
+        assertThrows(TransferLimitExceededException.class, () -> {
+            transferService.transfer("005", "5000001", "001", "1000001", new BigDecimal("600000"), null, "teller");
+            transferService.transfer("005", "5000001", "001", "1000001", new BigDecimal("400001"), null, "teller");
+        });
     }
 
-    @Test(expected = AccountNotActiveException.class)
+    @Test
     public void frozenAccountCannotTransfer() {
-        transferService.transfer("003", "3000003", "001", "1000001", new BigDecimal("1000"), null, "teller");
+        assertThrows(AccountNotActiveException.class, () -> {
+            transferService.transfer("003", "3000003", "001", "1000001", new BigDecimal("1000"), null, "teller");
+        });
     }
 
-    @Test(expected = InvalidAmountException.class)
+    @Test
     public void amountMustBePositive() {
-        transferService.transfer("001", "1000001", "001", "1000003", new BigDecimal("0"), null, "teller");
+        assertThrows(InvalidAmountException.class, () -> {
+            transferService.transfer("001", "1000001", "001", "1000003", new BigDecimal("0"), null, "teller");
+        });
     }
 
     @Test

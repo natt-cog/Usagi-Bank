@@ -1,8 +1,8 @@
 package jp.usagi.bank.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,15 +12,13 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.joda.time.LocalDate;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.time.LocalDate;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import jp.usagi.bank.domain.Account;
@@ -32,7 +30,6 @@ import jp.usagi.bank.service.BatchFileService.ImportResult;
  * ホスト連携ファイル (固定長 52 桁, MS932) のゴールデンファイルテスト.
  * COBOL バッチ (batch/cobol/UBEOD001.cbl) と同一レイアウトであることを保証する.
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
@@ -45,12 +42,12 @@ public class BatchFileServiceIT {
     @Autowired
     private BusinessDateService businessDateService;
 
-    @Before
+    @BeforeEach
     public void fixBusinessDate() {
-        businessDateService.override(new LocalDate(2018, 3, 15));
+        businessDateService.override(LocalDate.of(2018, 3, 15));
     }
 
-    @After
+    @AfterEach
     public void clear() {
         businessDateService.clearOverride();
     }
@@ -76,7 +73,7 @@ public class BatchFileServiceIT {
         batchFileService.exportAccounts(out);
         List<String> lines = IOUtils.readLines(new ByteArrayInputStream(out.toByteArray()), BatchFileService.HOST_CHARSET);
         for (String line : lines) {
-            assertEquals(line, BatchFileService.RECORD_LENGTH, line.length());
+            assertEquals(BatchFileService.RECORD_LENGTH, line.length(), line);
         }
         assertTrue(lines.get(0).startsWith("H20180315"));
         assertTrue(lines.get(lines.size() - 1).startsWith("T000000015"));

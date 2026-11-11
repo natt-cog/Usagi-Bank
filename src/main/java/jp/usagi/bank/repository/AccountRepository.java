@@ -3,7 +3,7 @@ package jp.usagi.bank.repository;
 import java.math.BigDecimal;
 import java.util.List;
 
-import javax.persistence.LockModeType;
+import jakarta.persistence.LockModeType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

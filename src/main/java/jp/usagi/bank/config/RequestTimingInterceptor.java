@@ -1,18 +1,18 @@
 package jp.usagi.bank.config;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
  * 応答時間ロギング. 勘定系SLA (オンライン 2秒以内) の監視用.
  */
 @Component
-public class RequestTimingInterceptor extends HandlerInterceptorAdapter {
+public class RequestTimingInterceptor implements HandlerInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(RequestTimingInterceptor.class);
     private static final String START_ATTR = "usagi.requestStart";

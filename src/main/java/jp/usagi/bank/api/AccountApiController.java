@@ -3,7 +3,7 @@ package jp.usagi.bank.api;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.joda.time.LocalDate;
+import java.time.LocalDate;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,12 +50,7 @@ public class AccountApiController {
             @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
         Account account = accountService.getAccount(branchCode, accountNo);
         Page<Transaction> txns = accountService.listTransactions(account, page, size);
-        return txns.map(new org.springframework.core.convert.converter.Converter<Transaction, TransactionDto>() {
-            @Override
-            public TransactionDto convert(Transaction source) {
-                return TransactionDto.from(source);
-            }
-        });
+        return txns.map(TransactionDto::from);
     }
 
     @GetMapping(value = "/{branchCode}/{accountNo}/statement", produces = MediaType.APPLICATION_XML_VALUE)

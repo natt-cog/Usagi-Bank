@@ -41,12 +41,12 @@ public class BatchApiController {
     }
 
     @PostMapping(value = "/accrued-file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ImportResult importAccrued(@RequestParam("file") MultipartFile file) throws IOException {
         return batchFileService.importAccrued(file.getInputStream());
     }
 
-    @PostMapping(value = "/eod", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "/eod", produces = MediaType.APPLICATION_JSON_VALUE)
     public EodResult runEndOfDay() {
         return endOfDayJob.run();
     }

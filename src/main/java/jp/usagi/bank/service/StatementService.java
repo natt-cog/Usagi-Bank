@@ -2,15 +2,16 @@ package jp.usagi.bank.service;
 
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
+import jakarta.annotation.PostConstruct;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 
-import org.joda.time.LocalDate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,8 +44,8 @@ public class StatementService {
     @Transactional(readOnly = true)
     public Statement buildStatement(Account account, LocalDate from, LocalDate to) {
         List<Transaction> txns = transactionRepository.findByAccountIdAndValueDateBetweenOrderByPostedAtAscIdAsc(
-                account.getId(), from.toDate(), to.toDate());
-        Branch branch = branchRepository.findOne(account.getBranchCode());
+                account.getId(), toDate(from), toDate(to));
+        Branch branch = branchRepository.findById(account.getBranchCode()).orElse(null);
 
         Statement st = new Statement();
         st.setGeneratedAt(new Date());
@@ -53,8 +54,8 @@ public class StatementService {
         st.setAccountNo(account.getAccountNo());
         st.setAccountType(account.getAccountType().getLabel());
         st.setCustomerName(account.getCustomer().getNameKanji());
-        st.setPeriodFrom(from.toDate());
-        st.setPeriodTo(to.toDate());
+        st.setPeriodFrom(toDate(from));
+        st.setPeriodTo(toDate(to));
 
         BigDecimal opening = account.getBalance();
         if (!txns.isEmpty()) {
@@ -81,6 +82,10 @@ public class StatementService {
             st.getEntries().add(e);
         }
         return st;
+    }
+
+    private static Date toDate(LocalDate d) {
+        return Date.from(d.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public String toXml(Statement statement) {

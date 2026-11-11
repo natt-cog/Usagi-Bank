@@ -54,7 +54,7 @@ public class AccountService {
 
     @Transactional(readOnly = true)
     public Account getAccount(Long id) {
-        Account account = accountRepository.findOne(id);
+        Account account = accountRepository.findById(id).orElse(null);
         if (account == null) {
             throw new AccountNotFoundException("?", String.valueOf(id));
         }
@@ -79,7 +79,7 @@ public class AccountService {
 
     @Transactional(readOnly = true)
     public Page<Transaction> listTransactions(Account account, int page, int size) {
-        return transactionRepository.findByAccountIdOrderByPostedAtDescIdDesc(account.getId(), new PageRequest(page, size));
+        return transactionRepository.findByAccountIdOrderByPostedAtDescIdDesc(account.getId(), PageRequest.of(page, size));
     }
 
     @Transactional(readOnly = true)

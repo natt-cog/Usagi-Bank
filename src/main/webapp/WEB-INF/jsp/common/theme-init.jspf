@@ -29,6 +29,7 @@
         if (mq.addEventListener) { mq.addEventListener('change', apply); } else if (mq.addListener) { mq.addListener(apply); }
     }
     on(window, 'storage', function (e) { if (!e || e.key === KEY) { apply(); } });
-    if (document.readyState === 'loading') { on(document, 'DOMContentLoaded', label); } else { label(); }
+    on(document, 'DOMContentLoaded', label);
+    on(window, 'load', label);
 })();
 </script>

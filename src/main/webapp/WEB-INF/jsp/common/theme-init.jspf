@@ -1,0 +1,33 @@
+<%@ page pageEncoding="UTF-8" %>
+<script>
+/* 画面テーマ: 保存済みの選択 (localStorage usagi.theme) → OS 設定の順に判定し, 描画前に body.dark を付与 */
+(function () {
+    var KEY = 'usagi.theme', body = document.body;
+    function saved() { try { return window.localStorage.getItem(KEY); } catch (e) { return null; } }
+    function osDark() { return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+    function isDark() { var t = saved(); return t ? t === 'dark' : osDark(); }
+    function label() {
+        var b = document.getElementById('theme-toggle');
+        if (b) { b.innerHTML = isDark() ? '&#9728; ライト' : '&#9790; ダーク'; b.title = isDark() ? 'ライトモードに切替' : 'ダークモードに切替'; }
+    }
+    function apply() {
+        var c = (' ' + body.className + ' ').replace(' dark ', ' ');
+        body.className = (isDark() ? c + 'dark' : c).replace(/^\s+|\s+$/g, '');
+        label();
+    }
+    function on(el, ev, fn) { if (el.addEventListener) { el.addEventListener(ev, fn, false); } else if (el.attachEvent) { el.attachEvent('on' + ev, fn); } }
+    apply();
+    on(document, 'click', function (e) {
+        var t = e.target || e.srcElement;
+        if (!t || t.id !== 'theme-toggle') { return; }
+        try { window.localStorage.setItem(KEY, isDark() ? 'light' : 'dark'); } catch (ex) { }
+        apply();
+    });
+    if (window.matchMedia) {
+        var mq = window.matchMedia('(prefers-color-scheme: dark)');
+        if (mq.addEventListener) { mq.addEventListener('change', apply); } else if (mq.addListener) { mq.addListener(apply); }
+    }
+    on(window, 'storage', function (e) { if (!e || e.key === KEY) { apply(); } });
+    if (document.readyState === 'loading') { on(document, 'DOMContentLoaded', label); } else { label(); }
+})();
+</script>

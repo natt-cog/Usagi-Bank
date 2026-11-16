@@ -2,8 +2,8 @@
 <script>
 /* 画面テーマ: 保存済みの選択 (localStorage usagi.theme) → OS 設定の順に判定し, 描画前に body.dark を付与 */
 (function () {
-    var KEY = 'usagi.theme', body = document.body;
-    function saved() { try { return window.localStorage.getItem(KEY); } catch (e) { return null; } }
+    var KEY = 'usagi.theme', body = document.body, chosen = null;
+    function saved() { try { return window.localStorage.getItem(KEY) || chosen; } catch (e) { return chosen; } }
     function osDark() { return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); }
     function isDark() { var t = saved(); return t ? t === 'dark' : osDark(); }
     function label() {
@@ -20,7 +20,8 @@
     on(document, 'click', function (e) {
         var t = e.target || e.srcElement;
         if (!t || t.id !== 'theme-toggle') { return; }
-        try { window.localStorage.setItem(KEY, isDark() ? 'light' : 'dark'); } catch (ex) { }
+        chosen = isDark() ? 'light' : 'dark';
+        try { window.localStorage.setItem(KEY, chosen); } catch (ex) { }
         apply();
     });
     if (window.matchMedia) {

@@ -87,7 +87,7 @@ body.dark .lookup { color: #7fb8ec; }
 body.dark .req { color: #ef7a6e; }
 body.dark .err { color: #f3a1a1; }
 body.dark .status-FROZEN td, body.dark td.status-FROZEN, body.dark .kyc-PENDING { color: #f0b450; }
-body.dark .status-CLOSED td, body.dark td.status-CLOSED { color: #6f7b88; }
+body.dark .status-CLOSED td, body.dark td.status-CLOSED { color: #8a96a3; }
 body.dark .kyc-REJECTED { color: #f3a1a1; }
 body.dark .kyc-VERIFIED { color: #8fd6a2; }
 body.dark.login { background: #0a2540; }

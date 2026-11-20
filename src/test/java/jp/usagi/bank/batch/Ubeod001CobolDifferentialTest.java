@@ -2,10 +2,14 @@ package jp.usagi.bank.batch;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -50,6 +54,40 @@ public class Ubeod001CobolDifferentialTest {
     public void boundaryCases() throws Exception {
         for (Object[] c : Ubeod001Fixtures.cases()) {
             assertSameAsCobol(((Path) c[1]).resolve("ACCOUNTS.DAT"));
+        }
+    }
+
+    @Test
+    public void missingInput() throws Exception {
+        assertSameOpenErrorAsCobol(null);
+    }
+
+    @Test
+    public void unreadableInput() throws Exception {
+        assertSameOpenErrorAsCobol(Ubeod001Fixtures.GOLDEN_INPUT);
+    }
+
+    /** 入力のオープン失敗: コンソール・RC が一致し, どちらも出力ファイルを作らない. */
+    private void assertSameOpenErrorAsCobol(Path input) throws Exception {
+        Path cobolDir = tmp.newFolder().toPath();
+        Path javaDir = tmp.newFolder().toPath();
+        if (input != null) {
+            for (Path dir : new Path[] { cobolDir, javaDir }) {
+                Path copy = Ubeod001Fixtures.copyInput(input, dir);
+                assumeTrue(copy.toFile().setReadable(false, false));
+                assumeFalse("running with read access regardless of permissions", Files.isReadable(copy));
+            }
+        }
+
+        Exec cobol = exec(cobolDir.toFile(), cobolExe.getPath());
+        ByteArrayOutputStream console = new ByteArrayOutputStream();
+        int javaRc = DailyInterestAccrualBatch.run(javaDir, new PrintStream(console, true, "ISO-8859-1"));
+
+        assertEquals(Ubeod001Fixtures.text(cobol.stdout), Ubeod001Fixtures.text(console.toByteArray()));
+        assertEquals(cobol.rc, javaRc);
+        for (Path dir : new Path[] { cobolDir, javaDir }) {
+            assertFalse(Files.exists(dir.resolve(DailyInterestAccrualBatch.OUTPUT_FILE)));
+            assertFalse(Files.exists(dir.resolve(DailyInterestAccrualBatch.LOG_FILE)));
         }
     }
 

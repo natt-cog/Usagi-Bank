@@ -1,0 +1,4 @@
+# UBEOD001 の入出力ファイルはバイト単位で比較するため改行コード変換をしない
+batch/cobol/data/** -text
+batch/cobol/expected/** -text
+src/test/resources/ubeod001/** -text

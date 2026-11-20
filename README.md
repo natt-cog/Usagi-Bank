@@ -56,8 +56,9 @@ curl -u admin:admin123 -o ACCOUNTS.DAT http://localhost:8080/usagi/api/batch/acc
 ## テスト
 
 ```bash
-JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 mvn test        # 39 件 (JUnit 4, SpringRunner, H2 Oracle モード)
+JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 mvn test        # 51 件 (JUnit 4, SpringRunner, H2 Oracle モード)
 cd batch/cobol && ./run.sh                                     # UBEOD001 をコンパイル・実行し expected/ACCRUED.DAT と比較
+java -cp target/classes jp.usagi.bank.batch.DailyInterestAccrualBatch <作業ディレクトリ>  # Java 移行版 UBEOD001 (ACCOUNTS.DAT → ACCRUED.DAT, UBEOD001.LOG)
 ```
 
 | テスト | 検証内容 |
@@ -69,6 +70,9 @@ cd batch/cobol && ./run.sh                                     # UBEOD001 をコ
 | `BankingApiIT` | 認証・ロール別認可・エラーコード (`UB-xxxx`)・日本語ラベル |
 | `WebSecurityIT` | 画面フォーム POST のサーバ側ロール制御 (監査ロールは照会のみ), CSRF |
 | `CobolParityTest` | Java の利息計算と COBOL `UBEOD001` の出力が 1 銭単位で一致すること |
+| `DailyInterestAccrualBatchTest` | Java 移行版 `UBEOD001` の出力が `batch/cobol/expected` と 1 バイト単位で一致すること |
+| `DailyInterestAccrualBatchCasesTest` | 境界ケース (桁あふれ, CRLF, 長短レコード, トレーラ不一致 等) で GnuCOBOL の出力 (`src/test/resources/ubeod001`) と 1 バイト単位で一致すること |
+| `Ubeod001CobolDifferentialTest` | `cobc` がある環境で COBOL 版と Java 版を同じ入力で実行し突き合わせ (なければスキップ) |
 
 ゴールデンファイルは `mvn test -Dgolden.argLine=-Dgolden.update=true` で再生成できます (`BatchFileServiceIT` 参照)。
 

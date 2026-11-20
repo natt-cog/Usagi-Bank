@@ -4,10 +4,9 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,25 +73,23 @@ public class Ubeod001CobolDifferentialTest {
         for (String c : command) {
             cmd.add(c);
         }
-        Process p;
+        File stdout = File.createTempFile("ubeod001", ".out");
         try {
-            p = new ProcessBuilder(cmd).directory(dir).redirectErrorStream(true).start();
-        } catch (IOException e) {
-            return new Exec(-1, new byte[0]);
-        }
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try (InputStream in = p.getInputStream()) {
-            byte[] buf = new byte[4096];
-            int n;
-            while ((n = in.read(buf)) != -1) {
-                out.write(buf, 0, n);
+            Process p;
+            try {
+                p = new ProcessBuilder(cmd).directory(dir).redirectErrorStream(true)
+                        .redirectOutput(stdout).start();
+            } catch (IOException e) {
+                return new Exec(-1, new byte[0]);
             }
+            if (!p.waitFor(60, TimeUnit.SECONDS)) {
+                p.destroyForcibly();
+                throw new IllegalStateException("timeout: " + cmd);
+            }
+            return new Exec(p.exitValue(), Files.readAllBytes(stdout.toPath()));
+        } finally {
+            stdout.delete();
         }
-        if (!p.waitFor(60, TimeUnit.SECONDS)) {
-            p.destroyForcibly();
-            throw new IllegalStateException("timeout: " + cmd);
-        }
-        return new Exec(p.exitValue(), out.toByteArray());
     }
 
     private static final class Exec {

@@ -31,7 +31,7 @@ import java.nio.file.Paths;
  * <li>読込: LF 区切り, CR は除去, 52 桁未満は空白補完, 超過分は切捨て.</li>
  * <li>書込: 末尾空白を除去して LF を付加.</li>
  * <li>数値項目 (PIC 9) は桁あふれ時に上位桁を切捨て, 小数部は切捨て.</li>
- * <li>戻り値 (RETURN-CODE): 正常 0, レコード種別不正・トレーラ件数不一致 8, 入力ファイルなし 12.</li>
+ * <li>戻り値 (RETURN-CODE): 正常 0, レコード種別不正・トレーラ件数不一致 8, 入力ファイルのオープン失敗 12.</li>
  * </ul>
  * 数値項目に数字以外が入っている場合は COBOL では未定義動作 (ホストでは S0C7) のため,
  * 本クラスではその時点で処理を打ち切り戻り値 12 とする.
@@ -78,15 +78,30 @@ public class DailyInterestAccrualBatch {
     /** 作業ディレクトリの ACCOUNTS.DAT を読み, 同じディレクトリに ACCRUED.DAT と UBEOD001.LOG を出力する. */
     public static int run(Path dir, PrintStream console) throws IOException {
         Path input = dir.resolve(INPUT_FILE);
-        if (!Files.isRegularFile(input)) {
-            console.print("UBEOD001E ACCOUNTS.DAT OPEN ERROR 35\n");
-            return RC_ERROR;
+        if (Files.notExists(input)) {
+            return openError(console, "35");
         }
-        try (InputStream in = new BufferedInputStream(Files.newInputStream(input));
+        InputStream opened;
+        try {
+            if (Files.isDirectory(input)) {
+                throw new IOException(input + " is a directory");
+            }
+            opened = Files.newInputStream(input);
+        } catch (IOException e) {
+            return openError(console, "37");
+        }
+        try (InputStream in = new BufferedInputStream(opened);
                 OutputStream out = new BufferedOutputStream(Files.newOutputStream(dir.resolve(OUTPUT_FILE)));
                 OutputStream log = new BufferedOutputStream(Files.newOutputStream(dir.resolve(LOG_FILE)))) {
             return new DailyInterestAccrualBatch(console).execute(in, out, log);
         }
+    }
+
+    /** OPEN INPUT 失敗 (FILE STATUS 35: ファイルなし, 37: 権限なし等). */
+    private static int openError(PrintStream console, String fileStatus) {
+        console.print("UBEOD001E ACCOUNTS.DAT OPEN ERROR " + fileStatus + "\n");
+        console.flush();
+        return RC_ERROR;
     }
 
     /** 1 回分のバッチ処理. インスタンスは使い捨て. */

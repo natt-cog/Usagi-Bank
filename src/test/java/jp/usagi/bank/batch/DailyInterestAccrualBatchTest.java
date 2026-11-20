@@ -3,6 +3,8 @@ package jp.usagi.bank.batch;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -51,6 +53,22 @@ public class DailyInterestAccrualBatchTest {
 
         assertEquals(DailyInterestAccrualBatch.RC_ERROR, rc);
         assertEquals("UBEOD001E ACCOUNTS.DAT OPEN ERROR 35\n", Ubeod001Fixtures.text(console.toByteArray()));
+        assertFalse(Files.exists(work.resolve(DailyInterestAccrualBatch.OUTPUT_FILE)));
+        assertFalse(Files.exists(work.resolve(DailyInterestAccrualBatch.LOG_FILE)));
+    }
+
+    @Test
+    public void unreadableInputEndsWithRc12AndCreatesNoOutput() throws IOException {
+        Path work = tmp.getRoot().toPath();
+        Path input = Ubeod001Fixtures.copyInput(Ubeod001Fixtures.GOLDEN_INPUT, work);
+        assumeTrue("POSIX permissions required", input.toFile().setReadable(false, false));
+        assumeFalse("running with read access regardless of permissions", Files.isReadable(input));
+        ByteArrayOutputStream console = new ByteArrayOutputStream();
+
+        int rc = DailyInterestAccrualBatch.run(work, new PrintStream(console, true, "ISO-8859-1"));
+
+        assertEquals(DailyInterestAccrualBatch.RC_ERROR, rc);
+        assertEquals("UBEOD001E ACCOUNTS.DAT OPEN ERROR 37\n", Ubeod001Fixtures.text(console.toByteArray()));
         assertFalse(Files.exists(work.resolve(DailyInterestAccrualBatch.OUTPUT_FILE)));
         assertFalse(Files.exists(work.resolve(DailyInterestAccrualBatch.LOG_FILE)));
     }

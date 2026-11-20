@@ -57,8 +57,11 @@ curl -u admin:admin123 -o ACCOUNTS.DAT http://localhost:8080/usagi/api/batch/acc
 
 ```bash
 JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 mvn test        # 51 件 (JUnit 4, SpringRunner, H2 Oracle モード)
-cd batch/cobol && ./run.sh                                     # UBEOD001 をコンパイル・実行し expected/ACCRUED.DAT と比較
-java -cp target/classes jp.usagi.bank.batch.DailyInterestAccrualBatch <作業ディレクトリ>  # Java 移行版 UBEOD001 (ACCOUNTS.DAT → ACCRUED.DAT, UBEOD001.LOG)
+(cd batch/cobol && ./run.sh)                                   # UBEOD001 をコンパイル・実行し expected/ACCRUED.DAT と比較
+
+# Java 移行版 UBEOD001: 作業ディレクトリの ACCOUNTS.DAT を読み ACCRUED.DAT, UBEOD001.LOG を出力 (mvn test 後)
+mkdir -p target/ubeod001 && cp batch/cobol/data/ACCOUNTS.DAT target/ubeod001/
+java -cp target/classes jp.usagi.bank.batch.DailyInterestAccrualBatch target/ubeod001
 ```
 
 | テスト | 検証内容 |

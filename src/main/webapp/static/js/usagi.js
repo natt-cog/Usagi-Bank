@@ -50,4 +50,15 @@
         table.find('th').removeClass('asc desc');
         th.addClass(asc ? 'asc' : 'desc');
     });
+    // 画面テーマ切替 (ライト/ダーク)
+    function isDark() { return $('body').hasClass('theme-dark'); }
+    function syncThemeLabel() { $('#themeToggle').text(isDark() ? 'ライト' : 'ダーク'); }
+    $(document).on('click', '#themeToggle', function () {
+        var dark = !isDark();
+        $('body').toggleClass('theme-dark', dark);
+        $(document.documentElement).toggleClass('theme-dark', dark);
+        try { window.localStorage.setItem('usagiTheme', dark ? 'dark' : 'light'); } catch (e) {}
+        syncThemeLabel();
+    });
+    $(document).ready(syncThemeLabel);
 })(jQuery);

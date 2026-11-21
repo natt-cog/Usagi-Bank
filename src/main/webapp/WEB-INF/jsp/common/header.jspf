@@ -14,14 +14,30 @@
 <link rel="stylesheet" href="${ctx}/static/css/usagi.css">
 <script src="${ctx}/static/js/jquery-1.12.4.min.js"></script>
 <script src="${ctx}/static/js/usagi.js"></script>
+<script>
+/* 画面テーマ初期化 (描画前に適用してちらつきを防ぐ) */
+(function (w, d) {
+    var t = null;
+    try { t = w.localStorage ? w.localStorage.getItem('usagiTheme') : null; } catch (e) {}
+    if (t !== 'light' && t !== 'dark') {
+        t = (w.matchMedia && w.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    }
+    if (t === 'dark') {
+        d.documentElement.className += ' theme-dark';
+        if (d.body) { d.body.className += ' theme-dark'; }
+    }
+})(window, document);
+</script>
 </head>
 <body>
+<script>if (/(^|\s)theme-dark(\s|$)/.test(document.documentElement.className)) { document.body.className += ' theme-dark'; }</script>
 <div id="header">
   <div class="brand"><a href="${ctx}/dashboard">うさぎ銀行 勘定系オンライン</a><span class="env">【検証環境】</span></div>
   <div class="user">
     <sec:authorize access="isAuthenticated()">
       <sec:authentication property="name" /> 様
       (<sec:authentication property="authorities" />)
+      <button type="button" id="themeToggle" class="link">ダーク</button>
       <form action="${ctx}/logout" method="post" class="inline">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
         <button type="submit" class="link">ログアウト</button>
